@@ -44,7 +44,9 @@ h1.glitch::before{color:var(--mag);clip-path:inset(20% 0 55% 0);animation:gl1 2.
 h1.glitch::after{color:var(--grn);clip-path:inset(60% 0 10% 0);animation:gl2 3.1s infinite linear alternate}
 @keyframes gl1{0%,92%{transform:none;opacity:0}94%{transform:translate(-3px,1px);opacity:.8}98%{transform:translate(3px,-1px);opacity:.8}100%{opacity:0}}
 @keyframes gl2{0%,90%{transform:none;opacity:0}93%{transform:translate(3px,1px);opacity:.7}97%{transform:translate(-3px,0);opacity:.7}100%{opacity:0}}
-#clock{margin-left:auto;color:var(--yel);text-shadow:0 0 8px rgba(249,240,2,.6);font-size:13px}
+#hright{margin-left:auto;display:flex;gap:12px;align-items:center}
+#clock{color:var(--yel);text-shadow:0 0 8px rgba(249,240,2,.6);font-size:13px}
+.hgroup{display:flex;gap:6px;align-items:center;padding:0 8px;border-left:1px solid rgba(0,240,255,.14)}
 #status{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--dim);cursor:pointer}
 #led{width:9px;height:9px;border-radius:50%;background:#444}
 #led.ok{background:var(--grn);box-shadow:0 0 10px var(--grn);animation:pulse 2s infinite}
@@ -85,7 +87,7 @@ h1.glitch::after{color:var(--grn);clip-path:inset(60% 0 10% 0);animation:gl2 3.1
   #heat{height:280px}
   .ap-chart canvas{min-height:170px}
   #total-chart{min-height:130px}
-  .rot-body.on{min-height:190px}
+  #rot-wrap{min-height:190px}
 }
 @media(max-width:700px){
   h1{font-size:15px;letter-spacing:2px}
@@ -140,7 +142,8 @@ h1.glitch::after{color:var(--grn);clip-path:inset(60% 0 10% 0);animation:gl2 3.1
 #comp-bar{display:flex;height:9px;margin-top:5px;border:1px solid rgba(0,240,255,.25);overflow:hidden;flex:none}
 #comp-bar .seg{height:100%;transition:width .6s}
 #comp-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:3px;font-size:10px;flex:none}
-#comp-legend .li{display:flex;align-items:center;gap:4px}
+#comp-legend .li{display:flex;align-items:center;gap:4px;cursor:pointer}
+#comp-legend .li:hover{color:var(--cyan)}
 #comp-legend .dot{width:7px;height:7px;border-radius:2px}
 #comp-legend .pct{color:var(--dim)}
 #goal-wrap{margin-top:4px;display:none;flex:none}
@@ -196,9 +199,13 @@ h1.glitch::after{color:var(--grn);clip-path:inset(60% 0 10% 0);animation:gl2 3.1
 #top10 .tk{color:var(--cyan)}
 .note{font-size:8px;color:var(--dim);margin-top:3px;flex:none}
 
-/* ローテーションパネル(F&G/VIX/マクロ/指数) */
-.rot-body{display:none;flex:1;min-height:0;gap:8px;align-items:center}
-.rot-body.on{display:flex}
+/* ローテーションパネル(F&G/VIX/マクロ/指数): スライド切替 */
+#rot-wrap{position:relative;flex:1;min-height:0;overflow:hidden}
+.rot-body{position:absolute;inset:0;display:none;gap:8px;align-items:center}
+.rot-body.on{display:flex;animation:rotin .45s both}
+.rot-body.leaving{display:flex;animation:rotout .45s both;pointer-events:none}
+@keyframes rotin{from{transform:translateX(80px);opacity:0}to{transform:none;opacity:1}}
+@keyframes rotout{from{transform:none;opacity:1}to{transform:translateX(-80px);opacity:0}}
 #rot-title .dots{float:right;display:inline-flex;gap:5px;padding-top:2px}
 #rot-title .dots span{width:8px;height:8px;border-radius:50%;background:var(--dim);cursor:pointer}
 #rot-title .dots span.on{background:var(--cyan);box-shadow:0 0 6px var(--cyan)}
@@ -285,33 +292,76 @@ h1.glitch::after{color:var(--grn);clip-path:inset(60% 0 10% 0);animation:gl2 3.1
 #flash{position:fixed;inset:0;background:#fff;z-index:110;pointer-events:none;opacity:0}
 #flash.on{animation:fl .45s}
 @keyframes fl{0%{opacity:.9}100%{opacity:0}}
+
+/* 起動/終了エフェクト */
+#boot-overlay{position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;align-items:center;justify-content:center;transition:opacity .5s}
+#boot-logo{font-family:'Orbitron';font-weight:900;font-size:min(8vw,54px);letter-spacing:8px;color:var(--cyan);
+  text-shadow:0 0 30px var(--cyan),0 0 80px rgba(0,240,255,.4);animation:bootlogo 1.1s both;text-align:center}
+#boot-logo small{display:block;font-size:12px;color:var(--mag);text-shadow:0 0 12px var(--mag);letter-spacing:6px;margin-top:10px;animation:pulse 1s infinite}
+@keyframes bootlogo{0%{opacity:0;transform:scale(.75);filter:blur(12px)}45%{opacity:1;filter:blur(0)}55%{transform:scale(1.02) translateX(-4px)}65%{transform:translateX(4px)}100%{transform:none}}
+header,#app>*{animation:panelin .55s both}
+header{animation-delay:.15s}
+#app>*:nth-child(1){animation-delay:.35s}
+#app>*:nth-child(2){animation-delay:.48s}
+#app>*:nth-child(3){animation-delay:.61s}
+#app>*:nth-child(4){animation-delay:.74s}
+#app>*:nth-child(5){animation-delay:.87s}
+#app>*:nth-child(6){animation-delay:1.0s}
+.apanel{animation:panelin .5s both}
+@keyframes panelin{0%{opacity:0;transform:translateY(16px);filter:brightness(2.2) saturate(0)}60%{opacity:1}100%{opacity:1;transform:none;filter:none}}
+body.closing{animation:crtoff .28s forwards}
+@keyframes crtoff{0%{transform:scale(1);filter:none}60%{transform:scaleY(.012);filter:brightness(4)}100%{transform:scale(.001,.012);filter:brightness(8)}}
+
+/* チュートリアル */
+#tour-dim{position:fixed;inset:0;background:rgba(2,3,10,.72);z-index:150;display:none}
+#tour-hl{position:fixed;z-index:151;border:2px solid var(--cyan);box-shadow:0 0 24px rgba(0,240,255,.8),inset 0 0 18px rgba(0,240,255,.2);pointer-events:none;display:none;transition:all .35s}
+#tour-tip{position:fixed;z-index:152;background:var(--panel2);border:1px solid var(--cyan);padding:12px 16px;max-width:360px;display:none;box-shadow:0 0 30px rgba(0,240,255,.35);
+  clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+#tour-tip b{color:var(--cyan);font-family:'Orbitron';font-size:12px;letter-spacing:1px}
+#tour-tip p{font-size:12px;line-height:1.75;margin:8px 0;color:var(--txt)}
+#tour-tip .tbtns{display:flex;gap:8px;justify-content:flex-end}
 </style>
 </head>
 <body>
 <div id="scanlines"></div>
 <canvas id="particles"></canvas>
 <div id="flash"></div>
+<div id="boot-overlay"><div id="boot-logo">NEURO-NAV<small>SYSTEM BOOT // 接続中...</small></div></div>
+<div id="tour-dim"></div><div id="tour-hl"></div><div id="tour-tip"></div>
 <div id="ath-overlay"><div id="ath-text">ALL-TIME HIGH<small>史上最高値更新 // DOPAMINE RELEASED</small></div></div>
 
 <header>
   <h1 class="glitch" data-t="NEURO-NAV">NEURO-NAV</h1>
-  <div id="status" title="クリックで回線診断"><div id="led"></div><span id="status-txt">BOOT</span></div>
-  <button class="btn" id="btn-add">+ 銘柄追加</button>
-  <button class="btn yel" id="btn-goal">目標設定</button>
-  <select class="hsel" id="sel-int" title="更新間隔">
-    <option value="5000">5秒</option><option value="10000" selected>10秒</option>
-    <option value="30000">30秒</option><option value="60000">60秒</option>
-  </select>
-  <span id="countdown">⟳ --</span>
-  <button class="btn yel" id="btn-sound">SE:ON</button>
-  <button class="btn yel" id="btn-notify">通知:OFF</button>
-  <button class="btn mag" id="btn-test">SEテスト</button>
-  <button class="btn" id="btn-diag">回線診断</button>
-  <button class="btn" id="btn-info">INFO</button>
-  <button class="btn" id="btn-export">保存</button>
-  <button class="btn" id="btn-import">復元</button>
-  <input type="file" id="import-file" accept=".json" style="display:none">
-  <div id="clock">--:--:--</div>
+  <div class="hgroup">
+    <button class="btn" id="btn-add">+ 銘柄追加</button>
+    <button class="btn yel" id="btn-goal">目標設定</button>
+  </div>
+  <div class="hgroup">
+    <select class="hsel" id="sel-int" title="更新間隔">
+      <option value="5000">5秒</option><option value="10000" selected>10秒</option>
+      <option value="30000">30秒</option><option value="60000">60秒</option>
+    </select>
+    <span id="countdown">⟳ --</span>
+  </div>
+  <div class="hgroup">
+    <button class="btn yel" id="btn-sound">SE:ON</button>
+    <button class="btn yel" id="btn-notify">通知:OFF</button>
+    <button class="btn mag" id="btn-test">SEテスト</button>
+  </div>
+  <div class="hgroup">
+    <button class="btn" id="btn-diag">回線診断</button>
+    <button class="btn" id="btn-help">ヘルプ</button>
+    <button class="btn" id="btn-info">INFO</button>
+  </div>
+  <div class="hgroup">
+    <button class="btn" id="btn-export">保存</button>
+    <button class="btn" id="btn-import">復元</button>
+    <input type="file" id="import-file" accept=".json" style="display:none">
+  </div>
+  <div id="hright">
+    <div id="status" title="クリックで回線診断"><div id="led"></div><span id="status-txt">BOOT</span></div>
+    <div id="clock">--:--:--</div>
+  </div>
 </header>
 
 <div id="app">
@@ -344,6 +394,7 @@ h1.glitch::after{color:var(--grn);clip-path:inset(60% 0 10% 0);animation:gl2 3.1
 
   <section id="fg-panel" class="panelbox">
     <h2 id="rot-title">FEAR & GREED INDEX // CNN</h2>
+    <div id="rot-wrap">
     <div id="fg-body" class="rot-body on">
       <div id="fg-left">
         <svg id="fg-gauge" viewBox="0 0 200 120"></svg>
@@ -360,7 +411,8 @@ h1.glitch::after{color:var(--grn);clip-path:inset(60% 0 10% 0);animation:gl2 3.1
     </div>
     <div id="macro-body" class="rot-body"><div class="mgrid" id="macro-grid"></div></div>
     <div id="idx-body" class="rot-body"><div class="mgrid" id="idx-grid"></div></div>
-    <div class="note" id="fg-note">12秒ごとにパネル自動切替(ホバーで停止/●クリックで選択)。</div>
+    </div>
+    <div class="note" id="fg-note">12秒ごとにパネル自動スライド(ホバーで停止/●クリックで選択)。VIXは過去5日推移。</div>
   </section>
 
   <main id="cards"></main>
@@ -743,14 +795,17 @@ async function fetchCalendar(){
 async function fetchNews(){
   const parse=xml=>{
     const doc=new DOMParser().parseFromString(xml,'text/xml');
-    return [...doc.querySelectorAll('item > title')].map(n=>n.textContent.trim()).filter(Boolean).slice(0,15);
+    return [...doc.querySelectorAll('item > title')].map(n=>n.textContent.trim()).filter(Boolean).slice(0,12);
   };
-  try{
-    const xml=await fetchVia('https://www3.nhk.or.jp/rss/news/cat5.xml','news',{expect:'text',validate:t=>t.includes('<item')});
-    const t=parse(xml);if(t.length)return t;
-  }catch(e){}
-  const xml=await fetchVia('https://www.cnbc.com/id/100003114/device/rss/rss.html','news',{expect:'text',validate:t=>t.includes('<item')});
-  return parse(xml);
+  const all=[];
+  for(const src of ['https://www3.nhk.or.jp/rss/news/cat5.xml','https://www.cnbc.com/id/100003114/device/rss/rss.html']){
+    try{
+      const xml=await fetchVia(src,'news',{expect:'text',validate:t=>t.includes('<item')});
+      parse(xml).forEach(t2=>{if(all.indexOf(t2)<0)all.push(t2);});
+    }catch(e){}
+  }
+  if(!all.length)throw new Error('NO_NEWS');
+  return all.slice(0,20);
 }
 
 /* ============ 更新ループ ============ */
@@ -1039,14 +1094,14 @@ function animate(){
 }
 function renderComposition(total){
   const bar=$('comp-bar'),leg=$('comp-legend');
-  if(holdings.length<2||!(total>0)){bar.style.display='none';leg.innerHTML='';return;}
+  if((holdings.length<2&&!holdings.some(h=>h.cash))||!(total>0)){bar.style.display='none';leg.innerHTML='';return;}
   bar.style.display='flex';
   let bh='',lh='';
   for(const h of holdings){
     const e=evalAmt(h);if(e==null)continue;
     const pct=e/total*100;
     bh+=`<div class="seg" style="width:${pct}%;background:${h.color}" title="${h.name}: ${fmtYen(e)} (${pct.toFixed(1)}%)"></div>`;
-    lh+=`<div class="li"><span class="dot" style="background:${h.color}"></span>${h.name} <b>${fmtYen(e)}</b> <span class="pct">${pct.toFixed(1)}%</span></div>`;
+    lh+=`<div class="li" data-hid="${h.id}" title="クリックで編集/削除"><span class="dot" style="background:${h.color}"></span>${h.name} <b>${fmtYen(e)}</b> <span class="pct">${pct.toFixed(1)}%</span></div>`;
   }
   bar.innerHTML=bh;leg.innerHTML=lh;
 }
@@ -1398,11 +1453,13 @@ async function refreshNews(){
   try{
     const titles=await fetchNews();
     if(!titles.length)throw new Error('NO_NEWS');
-    el.textContent=titles.join('　◆　');
-    el.style.animationDuration=Math.max(40,titles.join('').length*0.42)+'s';
+    const txt=titles.join('　◆　');
+    if(el.textContent===txt)return; /* 変化なしなら流れを中断しない */
+    el.textContent=txt;
+    el.style.animationDuration=Math.max(40,txt.length*0.42)+'s';
     el.style.animation='none';void el.offsetWidth;
     el.style.animation='';
-  }catch(e){el.textContent='ニュース取得失敗(回線診断で確認)';}
+  }catch(e){if(!el.textContent||el.textContent.includes('取得中'))el.textContent='ニュース取得失敗(回線診断で確認)';}
 }
 
 /* ============ Fear & Greed ============ */
@@ -1457,7 +1514,14 @@ const ROT=[
 ];
 let rotIdx=0,rotPaused=false;
 function renderRot(){
-  ROT.forEach((r,i)=>{const el=$(r.b);if(el)el.classList.toggle('on',i===rotIdx);});
+  ROT.forEach((r,i)=>{
+    const el=$(r.b);if(!el)return;
+    if(i===rotIdx){el.classList.add('on');el.classList.remove('leaving');}
+    else if(el.classList.contains('on')){
+      el.classList.remove('on');el.classList.add('leaving');
+      setTimeout(()=>el.classList.remove('leaving'),470);
+    }else el.classList.remove('leaving');
+  });
   $('rot-title').innerHTML=ROT[rotIdx].t+'<span class="dots">'+ROT.map((_,i)=>`<span class="${i===rotIdx?'on':''}" data-rot="${i}"></span>`).join('')+'</span>';
   if(rotIdx===0)renderFG();
   else if(rotIdx===1)renderVix();
@@ -1497,10 +1561,18 @@ function renderIdx(){
 }
 async function refreshExtras(){
   try{
-    const out=await sparkFetch(EXTRAS,'1d','5d');
+    /* 30分足×5日: VIX等の推移チャート用。前日比は日付境界から算出 */
+    const out=await sparkFetch(EXTRAS,'30m','5d');
     EXTRAS.forEach(s=>{
       const o=out[s];if(!o)return;
-      const prev=(o.pts&&o.pts.length>1)?o.pts[o.pts.length-2].v:o.prev;
+      let prev=null;
+      if(o.pts&&o.pts.length>1){
+        const lastD=new Date(o.pts[o.pts.length-1].t).toISOString().slice(0,10);
+        for(let i=o.pts.length-1;i>=0;i--){
+          if(new Date(o.pts[i].t).toISOString().slice(0,10)<lastD){prev=o.pts[i].v;break;}
+        }
+      }
+      if(prev==null)prev=o.prev;
       extras[s]={price:o.price,prev,chg:prev>0?(o.price/prev-1)*100:null,pts:o.pts};
     });
     try{localStorage.setItem('nnav_extras',JSON.stringify({d:extras,at:Date.now()}));}catch(e){}
@@ -2007,6 +2079,73 @@ $('import-file').addEventListener('change',e=>{
 document.querySelectorAll('.modal-bg').forEach(mb=>mb.addEventListener('click',e=>{
   if(e.target===mb)mb.classList.remove('open');
 }));
+/* 構成比の凡例クリックで編集/削除(現金もここから) */
+$('comp-legend').addEventListener('click',e=>{
+  const li=e.target.closest('[data-hid]');if(!li)return;
+  const h=holdings.find(x=>x.id===li.dataset.hid);
+  if(h){editingId=h.id;openAdd(h);}
+});
+
+/* ============ チュートリアル ============ */
+const TOUR=[
+  ['total-panel','合計パネル','全銘柄+現金の推定評価額をリアルタイム表示。▲は直前からの変化、⚡COMBOは連続上昇、NEXT ATHは史上最高値までの残り。下のタブでチャート期間を切替。'],
+  ['comp-legend','構成比と編集','銘柄ごとの内訳。ここをクリックすると編集/削除できる(パネルのない現金もここから)。'],
+  ['cards','銘柄パネル','投信の推定基準価額(公式基準価額×指数×為替のライブ予測)と評価額。1H〜1Yでチャート切替。「基準更新」で公式値に再同期。仮想通貨はコンパクト表示。'],
+  ['fg-panel','マーケット情報','Fear&Greed/VIX(5日推移)/マクロ/世界指数が12秒ごとにスライド。ホバーで停止、●クリックで固定。'],
+  ['heat-panel','実質構成ヒートマップ','保有投信を合成した「実質的に持っている個別株」。面積=比率、色=当日騰落。ホバーで詳細。'],
+  ['ticker-panel','経済指標とニュース','今週の重要経済指標(★=最重要、点滅=次のイベント)と経済ニュース。指標にカーソルで予想/前回値。'],
+  ['btn-add','銘柄追加','投信(オルカン等は公式基準価額を自動取得)・仮想通貨(数量だけ)・現金(金額だけ)を登録できる。'],
+  ['btn-sound','サウンド','OFF→ON→ON+の3段階。ON+は上昇ティックごとにコイン音。史上最高値・目標達成・キリ番で脳汁SE。'],
+  ['btn-export','バックアップ','データはこのブラウザ内にのみ保存。JSONで保存/復元。別端末やGitHub Pages版への引っ越しにも使う。'],
+];
+let tourIdx=-1;
+function tourEnd(){
+  tourIdx=-1;
+  ['tour-dim','tour-hl','tour-tip'].forEach(id=>{$(id).style.display='none';});
+}
+function tourShow(i){
+  if(i<0)i=0;
+  if(i>=TOUR.length){tourEnd();return;}
+  tourIdx=i;
+  const step=TOUR[i];
+  const el=document.getElementById(step[0]);
+  if(!el){tourShow(i+1);return;}
+  el.scrollIntoView({block:'nearest',behavior:'smooth'});
+  const dim=$('tour-dim'),hl=$('tour-hl'),tip=$('tour-tip');
+  dim.style.display='block';hl.style.display='block';tip.style.display='block';
+  setTimeout(()=>{
+    const r=el.getBoundingClientRect();
+    hl.style.left=(r.left-5)+'px';hl.style.top=(r.top-5)+'px';
+    hl.style.width=(r.width+10)+'px';hl.style.height=(r.height+10)+'px';
+    tip.innerHTML=`<b>${i+1}/${TOUR.length} ${step[1]}</b><p>${step[2]}</p>
+      <div class="tbtns">${i>0?'<button class="btn" id="tour-prev">戻る</button>':''}
+      <button class="btn" id="tour-next">${i===TOUR.length-1?'完了':'次へ'}</button>
+      <button class="btn mag" id="tour-skip">終了</button></div>`;
+    const tw=Math.min(370,innerWidth-20);
+    tip.style.maxWidth=tw+'px';
+    let tx=Math.min(Math.max(10,r.left),innerWidth-tw-10);
+    tip.style.left=tx+'px';tip.style.top='-500px';
+    requestAnimationFrame(()=>{
+      const th=tip.offsetHeight;
+      let ty=r.bottom+12;
+      if(ty+th>innerHeight-10)ty=Math.max(10,r.top-th-12);
+      tip.style.top=ty+'px';
+    });
+    $('tour-next').onclick=()=>tourShow(tourIdx+1);
+    $('tour-skip').onclick=tourEnd;
+    const pv=document.getElementById('tour-prev');
+    if(pv)pv.onclick=()=>tourShow(tourIdx-1);
+  },120);
+}
+$('tour-dim').addEventListener('click',tourEnd);
+$('btn-help').addEventListener('click',()=>tourShow(0));
+
+/* 起動/終了エフェクト制御 */
+setTimeout(()=>{
+  const b=$('boot-overlay');
+  if(b){b.style.opacity='0';setTimeout(()=>b.remove(),600);}
+},1300);
+addEventListener('beforeunload',()=>document.body.classList.add('closing'));
 setInterval(()=>{$('clock').textContent=new Date().toLocaleTimeString('ja-JP',{hour12:false});nyCountdown();},1000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)loopOnce();});
 
@@ -2040,7 +2179,7 @@ setInterval(refreshQuotes,60*1000);
 setInterval(refreshExtras,60*1000);
 setInterval(refreshFG,15*60*1000);
 setInterval(refreshCalendar,6*60*60*1000);
-setInterval(refreshNews,10*60*1000);
+setInterval(refreshNews,5*60*1000);
 </script>
 </body>
 </html>
