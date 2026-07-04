@@ -1,0 +1,2046 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NEURO-NAV v4.1</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#05060f; --panel:#0a0d1e; --panel2:#0d1226;
+  --cyan:#00f0ff; --mag:#ff2a6d; --grn:#00ff9f; --yel:#f9f002; --pur:#bd00ff;
+  --dim:#3a4266; --txt:#c8d3f5; --lbl:#9aa6d0;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--bg); color:var(--txt);
+  font-family:'Share Tech Mono',monospace; overflow-x:hidden;
+  background-image:
+    radial-gradient(ellipse at 50% -20%, #1a1040 0%, transparent 60%),
+    linear-gradient(rgba(0,240,255,.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,240,255,.05) 1px, transparent 1px);
+  background-size:100% 100%, 44px 44px, 44px 44px;
+}
+body.shake{animation:shake .5s linear}
+@keyframes shake{
+  0%,100%{transform:translate(0,0)}10%{transform:translate(-6px,3px)}20%{transform:translate(5px,-4px)}
+  30%{transform:translate(-4px,-3px)}40%{transform:translate(6px,2px)}50%{transform:translate(-5px,4px)}
+  60%{transform:translate(4px,-2px)}70%{transform:translate(-3px,2px)}80%{transform:translate(2px,-1px)}90%{transform:translate(-1px,1px)}
+}
+#scanlines{position:fixed;inset:0;pointer-events:none;z-index:90;
+  background:repeating-linear-gradient(0deg, rgba(0,0,0,.18) 0 1px, transparent 1px 3px);
+  mix-blend-mode:multiply}
+#particles{position:fixed;inset:0;pointer-events:none;z-index:95}
+
+header{display:flex;align-items:center;gap:7px;flex-wrap:wrap;
+  padding:6px 12px;border-bottom:1px solid rgba(0,240,255,.25);
+  background:linear-gradient(180deg, rgba(0,240,255,.06), transparent)}
+h1{font-family:'Orbitron';font-size:18px;letter-spacing:3px;color:var(--cyan);
+  text-shadow:0 0 10px var(--cyan),0 0 40px rgba(0,240,255,.4);position:relative;margin-right:8px}
+h1.glitch::before,h1.glitch::after{content:attr(data-t);position:absolute;left:0;top:0;width:100%;overflow:hidden}
+h1.glitch::before{color:var(--mag);clip-path:inset(20% 0 55% 0);animation:gl1 2.4s infinite linear alternate}
+h1.glitch::after{color:var(--grn);clip-path:inset(60% 0 10% 0);animation:gl2 3.1s infinite linear alternate}
+@keyframes gl1{0%,92%{transform:none;opacity:0}94%{transform:translate(-3px,1px);opacity:.8}98%{transform:translate(3px,-1px);opacity:.8}100%{opacity:0}}
+@keyframes gl2{0%,90%{transform:none;opacity:0}93%{transform:translate(3px,1px);opacity:.7}97%{transform:translate(-3px,0);opacity:.7}100%{opacity:0}}
+#clock{margin-left:auto;color:var(--yel);text-shadow:0 0 8px rgba(249,240,2,.6);font-size:13px}
+#status{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--dim);cursor:pointer}
+#led{width:9px;height:9px;border-radius:50%;background:#444}
+#led.ok{background:var(--grn);box-shadow:0 0 10px var(--grn);animation:pulse 2s infinite}
+#led.warn{background:var(--yel);box-shadow:0 0 10px var(--yel);animation:pulse 2s infinite}
+#led.ng{background:var(--mag);box-shadow:0 0 10px var(--mag)}
+@keyframes pulse{50%{opacity:.4}}
+.btn,.hsel{height:28px;font-family:'Share Tech Mono';font-size:11px;letter-spacing:1px;cursor:pointer}
+.btn{background:transparent;border:1px solid var(--cyan);color:var(--cyan);padding:0 10px;
+  clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);transition:.15s}
+.btn:hover{background:rgba(0,240,255,.15)}
+.btn.mag{border-color:var(--mag);color:var(--mag)}
+.btn.yel{border-color:var(--yel);color:var(--yel)}
+.hsel{background:#060814;border:1px solid var(--dim);color:var(--txt);padding:0 5px}
+#countdown{font-size:11px;color:var(--dim);min-width:46px}
+
+/* ===== レイアウト ===== */
+#app{display:flex;flex-direction:column;gap:10px;padding:10px;max-width:1900px;margin:0 auto}
+.panelbox{background:var(--panel);border:1px solid rgba(0,240,255,.22);padding:9px 13px;
+  clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);
+  display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.panelbox h2{font-family:'Orbitron';font-size:11px;color:var(--cyan);letter-spacing:2px;margin-bottom:5px;flex:none}
+@media(min-width:1200px){
+  #app{display:grid;height:calc(100vh - 44px);
+    grid-template-columns:repeat(12,1fr);
+    grid-template-rows:minmax(140px,10fr) minmax(210px,15fr) minmax(130px,9fr) 58px;
+    gap:9px;padding:9px;overflow:hidden}
+  #total-panel{grid-column:1/9;grid-row:1}
+  #fg-panel{grid-column:9/13;grid-row:1}
+  #cards{grid-column:1/13;grid-row:2;display:flex;gap:8px;min-height:0}
+  #cards .apanel{flex:3;min-width:0}
+  #cards .apanel.mini{flex:1.35}
+  #heat-panel{grid-column:1/9;grid-row:3}
+  #top10-panel{grid-column:9/13;grid-row:3}
+  #ticker-panel{grid-column:1/13;grid-row:4}
+}
+@media(max-width:1199px){
+  #cards{display:flex;flex-direction:column;gap:10px}
+  #heat{height:280px}
+  .ap-chart canvas{min-height:170px}
+  #total-chart{min-height:130px}
+  .rot-body.on{min-height:190px}
+}
+@media(max-width:700px){
+  h1{font-size:15px;letter-spacing:2px}
+  header{padding:5px 8px;gap:5px}
+  .btn,.hsel{height:26px;font-size:10px;padding:0 7px}
+  #clock{font-size:11px}
+  #total-val{font-size:28px}
+  #total-sub{gap:8px;font-size:10px}
+  .ap-head h3{font-size:12px}
+  .ap-nav .big{font-size:18px}
+  .ap-chart canvas{min-height:140px}
+  #heat{height:230px}
+  #app{padding:6px;gap:8px}
+  .panelbox,.apanel{padding:8px 10px}
+  #top10 table{font-size:10px}
+}
+.mini-stats{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;flex:none}
+.mini-stats span{background:#070a18;border:1px solid rgba(0,240,255,.15);padding:3px 8px;font-size:9px;color:var(--dim);letter-spacing:1px}
+.mini-stats b{display:block;color:#fff;font-weight:normal;font-size:12px;margin-top:1px}
+.apanel.mini .ap-chart canvas{min-height:55px}
+
+/* 合計パネル */
+#total-panel{position:relative;background:linear-gradient(135deg, rgba(0,240,255,.07), rgba(189,0,255,.05));border-color:rgba(0,240,255,.35)}
+#total-panel.pump{animation:pump .8s}
+@keyframes pump{30%{box-shadow:0 0 60px rgba(0,255,159,.8)}}
+.tp-label{font-size:10px;letter-spacing:3px;color:var(--dim);flex:none}
+#tv-row{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;flex:none}
+#total-val{font-family:'Orbitron';font-weight:900;font-size:clamp(24px,3vw,42px);letter-spacing:1px;
+  color:#fff;text-shadow:0 0 18px var(--cyan);line-height:1.05;transition:color .3s}
+#total-val.up{color:var(--grn);text-shadow:0 0 22px var(--grn)}
+#total-val.dn{color:var(--mag);text-shadow:0 0 22px var(--mag)}
+#total-val .yen{font-size:.5em;color:var(--lbl);text-shadow:0 0 8px rgba(154,166,208,.6)}
+#tick-delta{font-size:13px;transition:opacity .5s;opacity:0}
+#tick-delta.show{opacity:1}
+#combo{font-size:12px;font-family:'Orbitron';color:var(--yel);text-shadow:0 0 10px var(--yel);opacity:0;transition:opacity .3s}
+#combo.show{opacity:1}
+.fdelta{position:absolute;bottom:45%;font-size:13px;font-family:'Orbitron';pointer-events:none;z-index:6;animation:frise 2.5s forwards}
+.fdelta.up{color:var(--grn);text-shadow:0 0 8px var(--grn)}
+.fdelta.dn{color:var(--mag);text-shadow:0 0 8px var(--mag)}
+@keyframes frise{0%{opacity:0;transform:translateY(6px)}15%{opacity:1}100%{opacity:0;transform:translateY(-64px)}}
+#ath-row{display:none;align-items:center;gap:8px;margin-top:4px;font-size:10px;flex:none}
+#ath-row .lab{color:var(--dim);letter-spacing:2px;flex:none}
+#ath-mini{flex:1;height:8px;border:1px solid rgba(255,42,109,.4);background:#070a18}
+#ath-fill{height:100%;width:0;background:linear-gradient(90deg,#4a0c20,var(--mag));transition:width .8s}
+#ath-fill.hot{animation:pulse .7s infinite;box-shadow:0 0 12px var(--mag)}
+#ath-txt{flex:none;color:var(--lbl)}
+#movers{float:right;font-size:10px;letter-spacing:0;font-family:'Share Tech Mono'}
+#movers b{font-weight:normal;margin-left:6px}
+#total-sub{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;flex:none;margin-top:2px}
+#total-sub b{color:var(--yel);font-weight:normal}
+.up-t{color:var(--grn)!important} .dn-t{color:var(--mag)!important}
+#comp-bar{display:flex;height:9px;margin-top:5px;border:1px solid rgba(0,240,255,.25);overflow:hidden;flex:none}
+#comp-bar .seg{height:100%;transition:width .6s}
+#comp-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:3px;font-size:10px;flex:none}
+#comp-legend .li{display:flex;align-items:center;gap:4px}
+#comp-legend .dot{width:7px;height:7px;border-radius:2px}
+#comp-legend .pct{color:var(--dim)}
+#goal-wrap{margin-top:4px;display:none;flex:none}
+#goal-bar{position:relative;height:13px;border:1px solid rgba(249,240,2,.4);background:#070a18}
+#goal-fill{height:100%;width:0%;background:linear-gradient(90deg,#005e66,var(--cyan),var(--grn));transition:width .8s}
+#goal-txt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;text-shadow:0 0 4px #000}
+#tchart-wrap{flex:1;display:flex;flex-direction:column;min-height:55px;margin-top:4px}
+#total-chart{flex:1;width:100%;min-height:45px;display:block}
+.rtabs{display:flex;gap:3px;flex:none}
+.rtabs button{background:transparent;border:1px solid var(--dim);color:var(--dim);
+  font-family:inherit;font-size:10px;padding:2px 7px;cursor:pointer}
+.rtabs button.on{border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 8px rgba(0,240,255,.4)}
+.csrc{font-size:9px;color:var(--dim);margin-top:2px;flex:none}
+
+/* 銘柄パネル */
+.apanel{background:var(--panel);border:1px solid rgba(0,240,255,.22);border-left:4px solid var(--cyan);
+  padding:9px 13px;clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);
+  display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.ap-head{display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;flex:none}
+.ap-head h3{font-family:'Orbitron';font-size:13px;color:#fff;letter-spacing:1px}
+.ap-head .sym{font-size:10px;color:var(--pur);margin-top:1px}
+.ap-nav{margin-left:auto;text-align:right}
+.ap-nav .big{font-family:'Orbitron';font-size:clamp(17px,1.5vw,24px);font-weight:700;transition:background .3s;padding:0 4px}
+.ap-nav .big.tick-up{background:rgba(0,255,159,.22)}
+.ap-nav .big.tick-dn{background:rgba(255,42,109,.22)}
+.ap-nav .chg{display:block;font-size:11px;margin-top:1px}
+.ap-btns{display:flex;gap:6px}
+.ap-body{display:grid;grid-template-columns:minmax(210px,265px) 1fr;gap:9px;margin-top:7px;flex:1;min-height:0}
+@media(max-width:900px){.ap-body{grid-template-columns:1fr}}
+.stats-mini{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:minmax(36px,1fr);gap:4px;overflow-y:auto}
+.stat{background:#070a18;border:1px solid rgba(0,240,255,.15);padding:3px 8px;display:flex;flex-direction:column;justify-content:center;min-width:0}
+.stat .k{font-size:8px;color:var(--dim);letter-spacing:1px;white-space:nowrap;overflow:hidden}
+.stat .v{font-size:13px;margin-top:1px;color:#fff;white-space:nowrap;overflow:hidden}
+.ap-nav .ev{display:block;font-size:11px;color:var(--lbl);margin-top:3px}
+.ap-nav .ev b{font-family:'Orbitron';font-size:15px;color:#e8ecff;text-shadow:0 0 8px rgba(154,166,208,.45)}
+.ap-chart{display:flex;flex-direction:column;min-height:0}
+.ap-chart canvas{flex:1;width:100%;min-height:60px;display:block}
+#empty{text-align:center;padding:40px 20px;border:1px dashed var(--dim);color:var(--dim)}
+#empty b{color:var(--cyan)}
+
+/* ヒートマップ(ツリーマップ) */
+#heat{flex:1;position:relative;min-height:0}
+.htile{position:absolute;display:flex;flex-direction:column;justify-content:center;align-items:center;
+  border:1px solid rgba(255,255,255,.1);overflow:hidden;transition:background .5s;cursor:default}
+.htile .tk{font-family:'Orbitron';font-weight:700;color:#fff;text-shadow:0 0 5px rgba(0,0,0,.9);line-height:1.1}
+.htile .ch{color:#fff;text-shadow:0 0 4px #000;line-height:1.1}
+#top10-panel{overflow:hidden}
+#top10{flex:1;overflow-y:auto}
+#top10 table{width:100%;border-collapse:collapse;font-size:11px}
+#top10 td,#top10 th{padding:2px 5px;border-bottom:1px solid rgba(0,240,255,.1);text-align:right;white-space:nowrap}
+#top10 td:nth-child(2),#top10 th:nth-child(2){text-align:left}
+#top10 th{color:var(--dim);font-weight:normal;font-size:9px;position:sticky;top:0;background:var(--panel)}
+#top10 .tk{color:var(--cyan)}
+.note{font-size:8px;color:var(--dim);margin-top:3px;flex:none}
+
+/* ローテーションパネル(F&G/VIX/マクロ/指数) */
+.rot-body{display:none;flex:1;min-height:0;gap:8px;align-items:center}
+.rot-body.on{display:flex}
+#rot-title .dots{float:right;display:inline-flex;gap:5px;padding-top:2px}
+#rot-title .dots span{width:8px;height:8px;border-radius:50%;background:var(--dim);cursor:pointer}
+#rot-title .dots span.on{background:var(--cyan);box-shadow:0 0 6px var(--cyan)}
+#vix-left{flex:none;text-align:center;padding:0 12px}
+#vix-num{font-family:'Orbitron';font-weight:900;font-size:40px;line-height:1}
+#vix-zone{font-size:10px;letter-spacing:2px;margin-top:4px}
+#vix-right{flex:1;min-width:0;align-self:stretch;display:flex}
+#vix-chart{flex:1;width:100%;min-height:60px}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:1fr;gap:6px;flex:1;align-self:stretch}
+.mcell{background:#070a18;border:1px solid rgba(0,240,255,.15);padding:5px 10px;display:flex;flex-direction:column;justify-content:center}
+.mcell .k{font-size:9px;color:var(--dim);letter-spacing:1px}
+.mcell .v{font-family:'Orbitron';font-size:16px;color:#fff;margin-top:1px}
+.mcell .c{font-size:10px}
+#fg-left{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center}
+#fg-gauge{display:block;width:100%;max-width:200px}
+#fg-rating{text-align:center;font-family:'Orbitron';font-size:12px;letter-spacing:1px}
+#fg-right{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
+#fg-rows{display:grid;grid-template-columns:1fr 1fr;gap:3px;font-size:10px;color:var(--dim);flex:none}
+#fg-rows b{color:#fff;font-size:12px;margin-left:4px}
+#fg-hist{flex:1;width:100%;min-height:34px;display:block;margin-top:4px}
+
+/* 経済指標カレンダー & ニュース */
+#ticker-panel{display:flex;flex-direction:column;gap:3px;min-height:0;overflow:hidden}
+#calbar{display:flex;align-items:center;height:30px;overflow:hidden;position:relative;
+  background:var(--panel);border:1px solid rgba(0,240,255,.22);padding:0 8px}
+.barlab{font-family:'Orbitron';font-size:9px;color:var(--cyan);letter-spacing:2px;flex:none;margin-right:2px}
+#calbar .barlab{position:relative;z-index:2;background:var(--panel);height:100%;display:flex;align-items:center;padding-right:8px}
+#cal-in{display:inline-flex;gap:6px;white-space:nowrap;align-items:center;will-change:transform;flex:none}
+#cal-in.scroll{animation:calmq var(--caldur,60s) linear infinite;padding-left:30px}
+#cal-in.scroll:hover{animation-play-state:paused}
+@keyframes calmq{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.cal-chip{flex:none;display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 7px;
+  border:1px solid var(--dim);background:#070a18;white-space:nowrap;cursor:default}
+.cal-chip.hi{border-color:var(--mag);color:#ffd7e4}
+.cal-chip.med{border-color:var(--yel);color:#fdfbd0}
+.cal-chip.past{opacity:.35}
+.cal-chip.next{animation:pulse 1.4s infinite;box-shadow:0 0 10px rgba(255,42,109,.5)}
+#newsbar{position:relative;height:22px;overflow:hidden;background:var(--panel);
+  border:1px solid rgba(0,240,255,.22);display:flex;align-items:center}
+#newsbar .barlab{position:absolute;left:0;z-index:2;background:var(--panel);padding-left:8px;padding-right:8px;height:100%;display:flex;align-items:center;box-shadow:8px 0 8px rgba(10,13,30,.9)}
+#news-in{display:inline-block;white-space:nowrap;padding-left:100%;font-size:11px;color:var(--txt);
+  animation:mq 60s linear infinite;will-change:transform}
+#news-in b{color:var(--yel);font-weight:normal}
+@keyframes mq{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
+
+/* モーダル */
+.modal-bg{position:fixed;inset:0;background:rgba(2,3,10,.85);backdrop-filter:blur(3px);
+  z-index:100;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:40px 14px}
+.modal-bg.open{display:flex}
+.modal{background:var(--panel2);border:1px solid var(--cyan);max-width:640px;width:100%;
+  padding:22px 26px;box-shadow:0 0 40px rgba(0,240,255,.25);
+  clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px)}
+.modal h2{font-family:'Orbitron';color:var(--cyan);font-size:16px;letter-spacing:2px;margin-bottom:14px}
+.f{margin-bottom:12px}
+.f label{display:block;font-size:11px;letter-spacing:2px;color:var(--dim);margin-bottom:4px}
+.f input,.f select{width:100%;background:#060814;border:1px solid var(--dim);color:var(--txt);
+  font-family:'Share Tech Mono';font-size:14px;padding:8px 10px;outline:none}
+.f input:focus,.f select:focus{border-color:var(--cyan)}
+.f .hint{font-size:10px;color:var(--dim);margin-top:3px}
+.f .hint.ok{color:var(--grn)} .f .hint.ng{color:var(--mag)}
+.chk{display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer}
+.chk input{width:auto}
+.mrow{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+@media(max-width:520px){.grid2{grid-template-columns:1fr}}
+#diag-table{width:100%;font-size:12px;border-collapse:collapse;margin-top:6px}
+#diag-table td{padding:4px 8px;border-bottom:1px solid rgba(0,240,255,.1)}
+#diag-table .ok{color:var(--grn)} #diag-table .ng{color:var(--mag)}
+#m-info ol{margin:10px 0 0 20px;line-height:1.9;font-size:12px;color:var(--txt)}
+#m-info em{color:var(--yel);font-style:normal}
+#m-info .foot{margin-top:14px;font-size:10px;color:#4a5480;line-height:1.7}
+
+/* エフェクト */
+#ath-overlay{position:fixed;inset:0;z-index:120;display:none;align-items:center;justify-content:center;
+  pointer-events:none;background:radial-gradient(circle, rgba(255,42,109,.25), transparent 70%)}
+#ath-overlay.on{display:flex;animation:athbg 2.6s forwards}
+@keyframes athbg{0%{opacity:0}8%{opacity:1}80%{opacity:1}100%{opacity:0}}
+#ath-text{font-family:'Orbitron';font-weight:900;font-size:min(9vw,84px);color:#fff;text-align:center;
+  letter-spacing:6px;text-shadow:0 0 30px var(--mag),0 0 80px var(--mag)}
+#ath-text small{display:block;font-size:min(3.4vw,28px);color:var(--yel);text-shadow:0 0 20px var(--yel);letter-spacing:10px;margin-top:6px}
+#ath-overlay.on #ath-text{animation:athtxt 2.6s forwards}
+@keyframes athtxt{0%{transform:scale(.4);filter:blur(8px)}10%{transform:scale(1.15);filter:blur(0)}16%{transform:scale(1)}
+  20%{transform:translateX(-4px)}24%{transform:translateX(4px)}28%{transform:none}80%{opacity:1}100%{opacity:0;transform:scale(1.06)}}
+#flash{position:fixed;inset:0;background:#fff;z-index:110;pointer-events:none;opacity:0}
+#flash.on{animation:fl .45s}
+@keyframes fl{0%{opacity:.9}100%{opacity:0}}
+</style>
+</head>
+<body>
+<div id="scanlines"></div>
+<canvas id="particles"></canvas>
+<div id="flash"></div>
+<div id="ath-overlay"><div id="ath-text">ALL-TIME HIGH<small>史上最高値更新 // DOPAMINE RELEASED</small></div></div>
+
+<header>
+  <h1 class="glitch" data-t="NEURO-NAV">NEURO-NAV</h1>
+  <div id="status" title="クリックで回線診断"><div id="led"></div><span id="status-txt">BOOT</span></div>
+  <button class="btn" id="btn-add">+ 銘柄追加</button>
+  <button class="btn yel" id="btn-goal">目標設定</button>
+  <select class="hsel" id="sel-int" title="更新間隔">
+    <option value="5000">5秒</option><option value="10000" selected>10秒</option>
+    <option value="30000">30秒</option><option value="60000">60秒</option>
+  </select>
+  <span id="countdown">⟳ --</span>
+  <button class="btn yel" id="btn-sound">SE:ON</button>
+  <button class="btn yel" id="btn-notify">通知:OFF</button>
+  <button class="btn mag" id="btn-test">SEテスト</button>
+  <button class="btn" id="btn-diag">回線診断</button>
+  <button class="btn" id="btn-info">INFO</button>
+  <button class="btn" id="btn-export">保存</button>
+  <button class="btn" id="btn-import">復元</button>
+  <input type="file" id="import-file" accept=".json" style="display:none">
+  <div id="clock">--:--:--</div>
+</header>
+
+<div id="app">
+  <section id="total-panel" class="panelbox">
+    <div class="tp-label">TOTAL ESTIMATED VALUE // 推定評価額合計</div>
+    <div id="tv-row">
+      <div id="total-val">---<span class="yen"> 円</span></div>
+      <span id="tick-delta"></span>
+      <span id="combo"></span>
+    </div>
+    <div id="total-sub">
+      <span>前日比: <b id="t-day">--</b></span>
+      <span>ｾｯｼｮﾝ最高: <b id="t-shigh">--</b></span>
+      <span>史上最高: <b id="t-ath">--</b></span>
+      <span>更新: <b id="t-upd">--</b></span>
+      <span id="ny-status">NY市場: --</span>
+    </div>
+    <div id="comp-bar"></div>
+    <div id="comp-legend"></div>
+    <div id="goal-wrap">
+      <div id="goal-bar"><div id="goal-fill"></div><span id="goal-txt"></span></div>
+    </div>
+    <div id="ath-row"><span class="lab">NEXT ATH</span><div id="ath-mini"><div id="ath-fill"></div></div><span id="ath-txt">--</span></div>
+    <div id="tchart-wrap">
+      <div class="rtabs" id="t-rtabs"></div>
+      <canvas id="total-chart"></canvas>
+      <div class="csrc" id="tcs"></div>
+    </div>
+  </section>
+
+  <section id="fg-panel" class="panelbox">
+    <h2 id="rot-title">FEAR & GREED INDEX // CNN</h2>
+    <div id="fg-body" class="rot-body on">
+      <div id="fg-left">
+        <svg id="fg-gauge" viewBox="0 0 200 120"></svg>
+        <div id="fg-rating">--</div>
+      </div>
+      <div id="fg-right">
+        <div id="fg-rows"></div>
+        <canvas id="fg-hist"></canvas>
+      </div>
+    </div>
+    <div id="vix-body" class="rot-body">
+      <div id="vix-left"><div id="vix-num">--</div><div id="vix-zone">--</div></div>
+      <div id="vix-right"><canvas id="vix-chart"></canvas></div>
+    </div>
+    <div id="macro-body" class="rot-body"><div class="mgrid" id="macro-grid"></div></div>
+    <div id="idx-body" class="rot-body"><div class="mgrid" id="idx-grid"></div></div>
+    <div class="note" id="fg-note">12秒ごとにパネル自動切替(ホバーで停止/●クリックで選択)。</div>
+  </section>
+
+  <main id="cards"></main>
+
+  <section id="heat-panel" class="panelbox">
+    <h2>HOLDINGS HEATMAP // 実質構成ツリーマップ<span id="movers"></span></h2>
+    <div id="heat"></div>
+    <div class="note" id="heat-note">面積=実質保有比率、色=当日騰落(60秒更新)。カーソルを合わせるとセクター等の詳細。構成は月報ベース概算。</div>
+  </section>
+
+  <section id="top10-panel" class="panelbox">
+    <h2>TOP HOLDINGS // 実質上位</h2>
+    <div id="top10"></div>
+  </section>
+
+  <section id="ticker-panel">
+    <div id="calbar"><b class="barlab">経済指標</b><div id="cal-in"><span style="font-size:10px;color:var(--dim)">取得中...</span></div></div>
+    <div id="newsbar"><b class="barlab">NEWS</b><span id="news-in">経済ニュースを取得中...</span></div>
+  </section>
+</div>
+
+<!-- 追加/編集モーダル -->
+<div class="modal-bg" id="m-add">
+  <div class="modal">
+    <h2 id="m-add-title">ADD ASSET // 銘柄追加</h2>
+    <div class="f" id="a-fund-f"><label>かんたん登録(公式基準価額を自動取得)</label>
+      <select id="a-fund">
+        <option value="">手動設定(下に入力)</option>
+        <option value="253425">eMAXIS Slim 全世界株式(オール・カントリー)</option>
+        <option value="253266">eMAXIS Slim 米国株式(S&P500)</option>
+        <option value="254062">eMAXIS NASDAQ100インデックス</option>
+        <option value="__code">その他eMAXIS系(ファンドコード入力)</option>
+      </select>
+      <div class="hint" id="a-fund-hint">選ぶと名前・連動指数・基準価額が自動セットされる。</div>
+    </div>
+    <div class="f" id="a-fundcd-wrap" style="display:none">
+      <label>三菱UFJアセマネ ファンドコード(数字)</label>
+      <input id="a-fundcd" placeholder="例: 253425">
+    </div>
+    <div class="f"><label>投信名(表示名)</label><input id="a-name"></div>
+    <div class="f"><label>連動指数 / 先物</label>
+      <select id="a-preset"></select>
+    </div>
+    <div class="f" id="a-custom-wrap" style="display:none">
+      <label>カスタムシンボル (Yahoo Finance形式)</label>
+      <input id="a-custom" placeholder="例: 7203.T, ETH-USD, ^SOX">
+    </div>
+    <div class="f" id="a-fx-f"><label class="chk"><input type="checkbox" id="a-fx" checked> 為替(USD/JPY)に連動する(為替ヘッジなし)</label></div>
+    <div class="grid2">
+      <div class="f" id="a-nav-f"><label>公式基準価額(円/万口)</label><input id="a-nav" type="number" step="any"></div>
+      <div class="f"><label id="a-units-label">保有口数(口)</label><input id="a-units" type="number" step="any"></div>
+      <div class="f"><label id="a-cost-label">取得単価(円/万口・任意)</label><input id="a-cost" type="number" step="any"></div>
+    </div>
+    <div class="f"><div class="hint" id="a-crypto-hint" style="display:none">仮想通貨モード: 価格(円換算)は自動取得。保有数量を入れるだけでOK。</div></div>
+    <div class="mrow">
+      <button class="btn mag" id="a-delete" style="display:none">削除</button>
+      <button class="btn" id="a-cancel">キャンセル</button>
+      <button class="btn" id="a-save">登録</button>
+    </div>
+  </div>
+</div>
+
+<!-- 回線診断モーダル -->
+<div class="modal-bg" id="m-diag">
+  <div class="modal" style="max-width:560px">
+    <h2>DIAGNOSTICS // 回線診断</h2>
+    <div class="hint" id="diag-note">OKの経路が自動優先される(成功経路は記憶)。</div>
+    <table id="diag-table"></table>
+    <div class="mrow">
+      <button class="btn" id="diag-run">診断実行</button>
+      <button class="btn" id="diag-close">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- INFOモーダル -->
+<div class="modal-bg" id="m-info">
+  <div class="modal" style="max-width:640px">
+    <h2>INFO // 使い方と仕組み</h2>
+    <ol>
+      <li><em>+銘柄追加</em>で登録。オルカン/Slim S&P500/NASDAQ100は公式基準価額を自動取得し毎日再キャリブレーション。</li>
+      <li>推定式: <em>推定基準価額 = 公式基準価額 × 指数変動率 × 為替変動率</em>。基準値は公式基準価額の算出基準日に日付一致させた終値。</li>
+      <li>表示値は「次回基準価額のライブ予測」。証券口座の評価額は前回公式基準価額で固定なので、その日の変動分だけ差が出るのが正常(パネルの<em>公式NAV比</em>がその差)。</li>
+      <li>米市場休場日(独立記念日等)は先物も停止するためほぼ動かない。動きの有無はデータの実態そのまま(ダミー無し)。</li>
+      <li>数字が動かない時は<em>回線診断</em>。指数データは最大15分程度の遅延あり。</li>
+      <li>データはブラウザのlocalStorage保存。<em>保存/復元</em>でJSONバックアップ。GitHub Pagesに置けばスマホでも見られる。</li>
+    </ol>
+    <div class="foot">※ 表示は推定値であり実際の基準価額・評価額と乖離します。投資判断は自己責任で。データ: Yahoo Finance / 三菱UFJアセットマネジメント / Binance / CNN / ForexFactory / NHK / ExchangeRate-API (無保証・遅延あり)。構成銘柄比率は月報ベースの静的概算(コード内CONSTITUENTSで編集可)。</div>
+    <div class="mrow"><button class="btn" id="info-close">閉じる</button></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* ================================================================
+   構成銘柄データ(月報・指数構成ベースの概算)。編集可。
+   [ティッカー, 表示名, ファンド内比率%, セクター]
+================================================================ */
+const SECTORS={semi:'半導体',tech:'テクノロジー',comm:'通信サービス',cyc:'一般消費財',fin:'金融',health:'ヘルスケア',staples:'生活必需品',energy:'エネルギー',ind:'資本財・素材'};
+const CONSTITUENTS={
+  SP500:[
+    ['NVDA','エヌビディア',7.8,'semi'],['MSFT','マイクロソフト',7.0,'tech'],['AAPL','アップル',5.9,'tech'],
+    ['AMZN','アマゾン',4.0,'cyc'],['META','メタ',3.0,'comm'],['AVGO','ブロードコム',2.7,'semi'],
+    ['GOOGL','アルファベットA',2.2,'comm'],['GOOG','アルファベットC',1.8,'comm'],['TSLA','テスラ',1.8,'cyc'],
+    ['BRK-B','バークシャーB',1.6,'fin'],['JPM','JPモルガン',1.4,'fin'],['LLY','イーライリリー',1.3,'health'],
+    ['V','ビザ',1.1,'fin'],['XOM','エクソンモービル',1.0,'energy'],['MA','マスターカード',0.9,'fin'],
+    ['UNH','ユナイテッドヘルス',0.9,'health'],['COST','コストコ',0.9,'staples'],['PG','P&G',0.8,'staples'],
+    ['HD','ホームデポ',0.8,'cyc'],['WMT','ウォルマート',0.7,'staples'],['NFLX','ネットフリックス',0.7,'comm'],['JNJ','J&J',0.7,'health']],
+  NDX:[
+    ['NVDA','エヌビディア',9.5,'semi'],['MSFT','マイクロソフト',8.6,'tech'],['AAPL','アップル',7.3,'tech'],
+    ['AMZN','アマゾン',5.4,'cyc'],['AVGO','ブロードコム',4.8,'semi'],['META','メタ',3.8,'comm'],
+    ['NFLX','ネットフリックス',3.1,'comm'],['GOOGL','アルファベットA',2.8,'comm'],['GOOG','アルファベットC',2.7,'comm'],
+    ['TSLA','テスラ',2.6,'cyc'],['COST','コストコ',2.4,'staples'],['PLTR','パランティア',1.8,'tech'],
+    ['AMD','AMD',1.6,'semi'],['CSCO','シスコ',1.6,'tech'],['TMUS','TモバイルUS',1.5,'comm'],
+    ['LIN','リンデ',1.4,'ind'],['INTU','インテュイット',1.3,'tech'],['PEP','ペプシコ',1.2,'staples'],
+    ['QCOM','クアルコム',1.1,'semi'],['ADBE','アドビ',1.1,'tech'],['TXN','テキサスインスツルメンツ',1.1,'semi'],['AMAT','アプライドマテリアルズ',1.0,'semi']],
+  ACWI:[
+    ['NVDA','エヌビディア',4.7,'semi'],['MSFT','マイクロソフト',4.2,'tech'],['AAPL','アップル',3.6,'tech'],
+    ['AMZN','アマゾン',2.4,'cyc'],['META','メタ',1.8,'comm'],['AVGO','ブロードコム',1.6,'semi'],
+    ['GOOGL','アルファベットA',1.3,'comm'],['GOOG','アルファベットC',1.1,'comm'],['TSLA','テスラ',1.0,'cyc'],
+    ['TSM','TSMC',0.9,'semi'],['BRK-B','バークシャーB',0.9,'fin'],['JPM','JPモルガン',0.8,'fin'],
+    ['LLY','イーライリリー',0.7,'health'],['V','ビザ',0.6,'fin'],['XOM','エクソンモービル',0.5,'energy']],
+};
+const FUND_KEY={'253266':'SP500','254062':'NDX','253425':'ACWI'};
+const SYM_KEY={'ES=F':'SP500','^GSPC':'SP500','NQ=F':'NDX','^NDX':'NDX','ACWI':'ACWI'};
+
+/* ============ 定数・状態 ============ */
+const FXSYM='USDJPY=X';
+const enc=encodeURIComponent;
+const PRESETS=[
+  {s:'ES=F',n:'S&P500先物 (E-mini)',fx:true},
+  {s:'NQ=F',n:'NASDAQ100先物 (E-mini)',fx:true},
+  {s:'ACWI',n:'MSCI ACWI ETF (オルカン連動)',fx:true},
+  {s:'YM=F',n:'NYダウ先物 (E-mini)',fx:true},
+  {s:'NIY=F',n:'日経225先物 (CME円建て)',fx:false},
+  {s:'^N225',n:'日経平均株価',fx:false},
+  {s:'^GSPC',n:'S&P500指数 (現物)',fx:true},
+  {s:'^NDX',n:'NASDAQ100指数 (現物)',fx:true},
+  {s:'^SOX',n:'SOX半導体指数',fx:true},
+  {s:'GC=F',n:'金先物 (COMEX)',fx:true},
+  {s:'CL=F',n:'WTI原油先物',fx:true},
+  {s:'BTC-USD',n:'ビットコイン (24h稼働)',fx:true},
+  {s:'__cash',n:'💴 現金(円・変動なし)',fx:false},
+  {s:'__custom',n:'カスタム入力…',fx:true},
+];
+const FUND_DEFAULT={'253425':{sym:'ACWI',fx:true},'253266':{sym:'ES=F',fx:true},'254062':{sym:'NQ=F',fx:true}};
+const COLORS=['#00f0ff','#ff2a6d','#f9f002','#00ff9f','#bd00ff','#ff9e00','#4d79ff','#ff5ce1'];
+const RANGES={'1H':['1d','1m'],'1D':null,'5D':['5d','15m'],'1M':['1mo','60m'],'3M':['3mo','1d'],'6M':['6mo','1d'],'1Y':['1y','1d']};
+const RANGE_TTL={'1H':120000};
+let holdings=JSON.parse(localStorage.getItem('nnav_holdings')||'[]');
+let ath=JSON.parse(localStorage.getItem('nnav_ath')||'null');
+let goal=JSON.parse(localStorage.getItem('nnav_goal')||'null');
+let seOn=localStorage.getItem('nnav_se')!=='off';
+let notifyOn=localStorage.getItem('nnav_notify')==='on';
+const market={},sess={},histCache={},rangeSel={};
+let quotes={},fgData=null,totalHistory=[],totalRange='1D';
+let sessionHigh=null,dispTotal=null,lastTotal=null,firstCalc=true,prevEst={};
+let lastSessFx=0,lastAthFx=0,editingId=null,loopTimer=null,nextAt=0;
+let seTick=localStorage.getItem('nnav_setick')==='on';
+let combo=0,lastComboFx=0,lastCoin=0,msMax=+(localStorage.getItem('nnav_ms')||0);
+const $=id=>document.getElementById(id);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+holdings.forEach((h,i)=>{if(!h.color)h.color=COLORS[i%COLORS.length];});
+
+/* ============ 汎用フェッチ ============ */
+const PROXIES=[
+  u=>u,
+  u=>'https://corsproxy.io/?url='+enc(u),
+  u=>'https://api.allorigins.win/raw?url='+enc(u),
+  u=>'https://api.codetabs.com/v1/proxy?quest='+enc(u),
+  u=>'https://api.cors.lol/?url='+enc(u),
+];
+const PXN=['直接','corsproxy','allorigins','codetabs','cors.lol'];
+let pxPref=Object.assign({yahoo:2,cnn:2,stooq:2,mufg:0,binance:0,erapi:0,ffcal:2,tvcal:2,news:2},
+  JSON.parse(localStorage.getItem('nnav_px')||'{}'));
+function savePx(){localStorage.setItem('nnav_px',JSON.stringify(pxPref));}
+async function fetchVia(url,family,opt){
+  opt=opt||{};
+  const expect=opt.expect||'json',validate=opt.validate;
+  const idxs=PROXIES.map((_,i)=>i);
+  const order=pxPref[family]!=null?[pxPref[family],...idxs.filter(i=>i!==pxPref[family])]:idxs;
+  let lastErr;
+  for(const i of order){
+    try{
+      const timeout=i===0?6000:(opt.timeout||12000);
+      const ctl=new AbortController();const to=setTimeout(()=>ctl.abort(),timeout);
+      const res=await fetch(PROXIES[i](url),{cache:'no-store',signal:ctl.signal});
+      clearTimeout(to);
+      if(!res.ok)throw new Error('HTTP'+res.status);
+      const txt=await res.text();
+      if(!txt||txt.length<5)throw new Error('EMPTY');
+      if(validate&&!validate(txt))throw new Error('内容不正');
+      const out=expect==='json'?JSON.parse(txt):txt;
+      if(pxPref[family]!==i){pxPref[family]=i;savePx();}
+      return out;
+    }catch(err){lastErr=err;}
+  }
+  throw lastErr||new Error('ALL_ROUTES_FAILED');
+}
+
+/* ============ データソース ============ */
+const vYahoo=t=>t.includes('regularMarketPrice')||t.includes('chartPreviousClose');
+async function yahooChart(sym,range,interval){
+  let lastErr;
+  for(const host of ['query1','query2']){
+    try{
+      const j=await fetchVia(`https://${host}.finance.yahoo.com/v8/finance/chart/${enc(sym)}?interval=${interval}&range=${range}&includePrePost=true`,'yahoo',{validate:vYahoo});
+      const r=j&&j.chart&&j.chart.result&&j.chart.result[0];
+      if(!r||!r.meta)throw new Error('BAD_JSON');
+      const ts=r.timestamp||[],q=(r.indicators&&r.indicators.quote&&r.indicators.quote[0])||{};
+      const cl=q.close||[],pts=[];
+      for(let k=0;k<ts.length;k++)if(cl[k]!=null)pts.push({t:ts[k]*1000,v:cl[k],d:new Date(ts[k]*1000).toISOString().slice(0,10)});
+      return {meta:r.meta,pts};
+    }catch(err){lastErr=err;}
+  }
+  throw lastErr;
+}
+async function sparkFetch(symList,interval,range){
+  const j=await fetchVia(`https://query1.finance.yahoo.com/v7/finance/spark?symbols=${enc(symList.join(','))}&range=${range||'1d'}&interval=${interval||'2m'}`,'yahoo',{validate:t=>t.includes('spark')||t.includes('regularMarketPrice')});
+  const res=(j.spark&&j.spark.result)||[];
+  const out={};
+  res.forEach(r=>{
+    const rr=r.response&&r.response[0];if(!rr)return;
+    const meta=rr.meta||{};
+    const ts=rr.timestamp||[];
+    const cl=(((rr.indicators||{}).quote||[{}])[0]||{}).close||[];
+    const pts=[];for(let k=0;k<ts.length;k++)if(cl[k]!=null)pts.push({t:ts[k]*1000,v:cl[k]});
+    const price=meta.regularMarketPrice!=null?meta.regularMarketPrice:(pts.length?pts[pts.length-1].v:null);
+    const prev=meta.chartPreviousClose!=null?meta.chartPreviousClose:meta.previousClose;
+    if(price!=null)out[r.symbol]={price,prev,time:(meta.regularMarketTime||0)*1000,pts,name:r.symbol};
+  });
+  if(!Object.keys(out).length)throw new Error('SPARK_EMPTY');
+  return out;
+}
+function mapStooq(sym){
+  const s=sym.toUpperCase();
+  const M={'ES=F':'es.f','NQ=F':'nq.f','YM=F':'ym.f','NIY=F':'^nkx','GC=F':'gc.f','CL=F':'cl.f',
+    '^GSPC':'^spx','^NDX':'^ndx','^DJI':'^dji','^N225':'^nkx','^SOX':'^sox',
+    'USDJPY=X':'usdjpy','BTC-USD':'btcusd','ACWI':'acwi.us'};
+  if(s in M)return M[s];
+  if(s.endsWith('.T'))return s.slice(0,-2).toLowerCase()+'.jp';
+  if(s.endsWith('=X'))return s.slice(0,-2).toLowerCase();
+  if(s.endsWith('=F'))return s.slice(0,-2).toLowerCase()+'.f';
+  if(s.endsWith('-USD'))return s.replace('-','').toLowerCase();
+  if(s.startsWith('^'))return s.toLowerCase();
+  return s.toLowerCase()+'.us';
+}
+function pushSess(sym,v){
+  if(!sess[sym])sess[sym]=[];
+  const a=sess[sym];a.push({t:Date.now(),v});
+  if(a.length>2000)a.shift();
+  return a;
+}
+async function updateSymbol(sym){
+  try{
+    const {meta,pts}=await yahooChart(sym,'1d','2m');
+    if(meta.regularMarketPrice==null)throw new Error('NO_PRICE');
+    pushSess(sym,meta.regularMarketPrice);
+    market[sym]={price:meta.regularMarketPrice,
+      prev:(meta.chartPreviousClose!=null?meta.chartPreviousClose:meta.previousClose),
+      time:(meta.regularMarketTime||0)*1000,pts,name:meta.shortName||sym,src:'Yahoo'};
+    return true;
+  }catch(e){}
+  const st=mapStooq(sym);
+  if(st){
+    try{
+      const csv=await fetchVia(`https://stooq.com/q/l/?s=${enc(st)}&f=sd2t2ohlcv&e=csv`,'stooq',{expect:'text',validate:t=>t.toUpperCase().includes(st.toUpperCase().replace('^',''))});
+      const c=csv.trim().split('\n')[1].split(',');
+      const close=parseFloat(c[6]);
+      if(!(close>0))throw new Error('N/D');
+      pushSess(sym,close);
+      market[sym]={price:close,prev:parseFloat(c[3])||close,time:Date.now(),pts:sess[sym].slice(),name:st,src:'Stooq'};
+      return true;
+    }catch(e){}
+  }
+  if(sym==='BTC-USD'){
+    try{
+      const j=await fetchVia('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT','binance',{validate:t=>t.includes('lastPrice')});
+      const p=parseFloat(j.lastPrice);
+      if(p>0){pushSess(sym,p);market[sym]={price:p,prev:parseFloat(j.prevClosePrice)||parseFloat(j.openPrice)||p,time:Date.now(),pts:sess[sym].slice(),name:'BTCUSDT',src:'Binance'};return true;}
+    }catch(e){}
+  }
+  if(sym===FXSYM){
+    try{
+      const j=await fetchVia('https://open.er-api.com/v6/latest/USD','erapi',{validate:t=>t.includes('JPY')});
+      const v=j&&j.rates&&j.rates.JPY;
+      if(v>0){pushSess(sym,v);market[sym]={price:v,prev:v,time:(j.time_last_update_unix||0)*1000,pts:sess[sym].slice(),name:'USD/JPY(日次)',src:'er-api'};return true;}
+    }catch(e){}
+  }
+  return false;
+}
+async function ensureRange(sym,rk){
+  if(rk==='1D'){const m=market[sym];return (m&&m.pts&&m.pts.length>1)?m.pts:(sess[sym]||[]);}
+  const key=sym+'|'+rk,c=histCache[key];
+  const ttl=RANGE_TTL[rk]||15*60*1000;
+  if(c&&Date.now()-c.at<ttl)return c.pts;
+  const [range,interval]=RANGES[rk];
+  let {pts}=await yahooChart(sym,range,interval);
+  if(rk==='1H'&&pts.length){
+    const last=pts[pts.length-1].t;
+    pts=pts.filter(p=>p.t>=last-3600e3);
+  }
+  histCache[key]={pts,at:Date.now()};
+  saveHistLS();
+  return pts;
+}
+async function getSeriesFor(sym,rk){
+  if(rk==='1D'){const m=market[sym];return (m&&m.pts&&m.pts.length>1)?m.pts:(sess[sym]||[]);}
+  return ensureRange(sym,rk);
+}
+async function fetchFundNav(cd){
+  const j=await fetchVia('https://developer.am.mufg.jp/fund_information_latest/fund_cd/'+enc(cd),'mufg',{validate:t=>t.includes('datasets')});
+  const d=j&&j.datasets&&j.datasets[0];
+  if(!d||!(+d.nav>0))throw new Error('FUND_NG');
+  return {nav:+d.nav,date:d.base_date,name:(d.fund_name||'').normalize('NFKC'),chg:+d.cmp_prev_day||0};
+}
+async function fetchFearGreed(){
+  const j=await fetchVia('https://production.dataviz.cnn.io/index/fearandgreed/graphdata','cnn',{validate:t=>t.includes('fear_and_greed')});
+  const f=j.fear_and_greed;
+  const hist=((j.fear_and_greed_historical&&j.fear_and_greed_historical.data)||[]).map(p=>({t:+p.x,v:+p.y}));
+  return {score:Math.round(+f.score),rating:f.rating,prevClose:+f.previous_close,
+    w1:+f.previous_1_week,m1:+f.previous_1_month,y1:+f.previous_1_year,hist};
+}
+/* 経済指標カレンダー: FF(2ホスト) → TradingView → Myfxbook RSS → 静的FOMC日程 */
+async function fetchCalendarFF(){
+  let lastErr;
+  for(const host of ['nfs.faireconomy.media','cdn-nfs.faireconomy.media']){
+    try{
+      const j=await fetchVia(`https://${host}/ff_calendar_thisweek.json`,'ffcal',{validate:t=>t.trim().startsWith('[')&&t.includes('impact'),timeout:10000});
+      return j.filter(e=>{
+        const imp=e.impact,c=e.country;
+        return (imp==='High'&&['USD','JPY','EUR','CNY'].includes(c))||(imp==='Medium'&&['USD','JPY'].includes(c));
+      });
+    }catch(e){lastErr=e;}
+  }
+  throw lastErr;
+}
+async function fetchCalendarMFB(){
+  const xml=await fetchVia('https://www.myfxbook.com/rss/forex-economic-calendar-events','news',{expect:'text',validate:t=>t.includes('<item'),timeout:12000});
+  const doc=new DOMParser().parseFromString(xml,'text/xml');
+  const cmap=[['United States','USD'],['Japan','JPY'],['Euro','EUR'],['European','EUR'],['China','CNY']];
+  const evs=[];
+  for(const it of doc.querySelectorAll('item')){
+    const title=(it.querySelector('title')||{textContent:''}).textContent||'';
+    const pd=(it.querySelector('pubDate')||{textContent:''}).textContent||'';
+    const cm=cmap.find(c=>title.includes(c[0]));
+    if(!cm||!pd)continue;
+    evs.push({title:title.replace(/^[^,]+,\s*/,'').trim(),country:cm[1],impact:'Medium',date:pd,forecast:'',previous:''});
+  }
+  if(!evs.length)throw new Error('MFB_EMPTY');
+  return evs;
+}
+/* FRB公表済みのFOMC日程(2026年・確定情報)。全ソース死亡時の最終手段 */
+function fetchCalendarStatic(){
+  return ['2026-01-28','2026-03-18','2026-04-29','2026-06-17','2026-07-29','2026-09-16','2026-10-28','2026-12-09']
+    .map(d=>({title:'FOMC政策金利発表(静的日程)',country:'USD',impact:'High',date:d+'T14:00:00-04:00',forecast:'',previous:''}));
+}
+async function fetchCalendarTV(){
+  const from=new Date(Date.now()-6*36e5).toISOString();
+  const to=new Date(Date.now()+8*864e5).toISOString();
+  const j=await fetchVia(`https://economic-calendar.tradingview.com/events?from=${enc(from)}&to=${enc(to)}&countries=${enc('US,JP,EU,CN')}`,'tvcal',{validate:t=>t.includes('result')});
+  const arr=(j&&j.result)||[];
+  const cmap={US:'USD',JP:'JPY',EU:'EUR',CN:'CNY'};
+  return arr.filter(e=>(+e.importance||0)>=0).map(e=>({
+    title:e.title||e.indicator||'',
+    country:cmap[e.country]||e.country,
+    impact:(+e.importance||0)>=1?'High':'Medium',
+    date:e.date,
+    forecast:e.forecast!=null?String(e.forecast):'',
+    previous:e.previous!=null?String(e.previous):''
+  })).filter(e=>e.impact==='High'||['USD','JPY'].includes(e.country));
+}
+async function fetchCalendar(){
+  try{return await fetchCalendarFF();}catch(e){}
+  try{return await fetchCalendarTV();}catch(e){}
+  try{return await fetchCalendarMFB();}catch(e){}
+  return fetchCalendarStatic();
+}
+/* 経済ニュース(NHK経済RSS → CNBC) */
+async function fetchNews(){
+  const parse=xml=>{
+    const doc=new DOMParser().parseFromString(xml,'text/xml');
+    return [...doc.querySelectorAll('item > title')].map(n=>n.textContent.trim()).filter(Boolean).slice(0,15);
+  };
+  try{
+    const xml=await fetchVia('https://www3.nhk.or.jp/rss/news/cat5.xml','news',{expect:'text',validate:t=>t.includes('<item')});
+    const t=parse(xml);if(t.length)return t;
+  }catch(e){}
+  const xml=await fetchVia('https://www.cnbc.com/id/100003114/device/rss/rss.html','news',{expect:'text',validate:t=>t.includes('<item')});
+  return parse(xml);
+}
+
+/* ============ 更新ループ ============ */
+function symbols(){
+  const s=new Set(holdings.filter(h=>!h.cash).map(h=>h.symbol));
+  if(holdings.some(h=>h.fxLinked)||holdings.length===0)s.add(FXSYM);
+  return [...s];
+}
+function constituentTickers(){
+  const list=combinedWeights();
+  return list?list.slice(0,24).map(s=>s.tk):[];
+}
+let refreshing=false;
+async function refresh(){
+  if(refreshing)return;refreshing=true;
+  $('countdown').textContent='⟳ SYNC';
+  try{
+    const syms=symbols();
+    let ok=0;
+    try{
+      const out=await sparkFetch(syms,'2m','1d');
+      for(const s of syms){
+        if(out[s]){
+          pushSess(s,out[s].price);
+          market[s]=Object.assign({},out[s],{src:'Yahoo',name:(market[s]&&market[s].name)||s});
+          ok++;
+        }
+      }
+    }catch(e){}
+    if(ok<syms.length){
+      const miss=syms.filter(s=>!market[s]);
+      await Promise.allSettled(miss.map(updateSymbol));
+      ok=syms.filter(s=>market[s]).length;
+    }
+    const led=$('led');
+    const srcs=[...new Set(syms.map(s=>market[s]&&market[s].src).filter(Boolean))];
+    if(ok>=syms.length&&ok>0){led.className='ok';$('status-txt').textContent='ONLINE ['+srcs.join('+')+'/'+PXN[pxPref.yahoo??0]+']';}
+    else if(ok>0){led.className='warn';$('status-txt').textContent='PARTIAL ('+ok+'/'+syms.length+')';}
+    else{led.className='ng';$('status-txt').textContent='SIGNAL LOST';}
+    if(ok>0){$('t-upd').textContent=new Date().toLocaleTimeString('ja-JP');compute();saveSnap();}
+  }finally{refreshing=false;}
+}
+async function loopOnce(){
+  await refresh();
+  const iv=+($('sel-int').value);
+  nextAt=Date.now()+iv;
+  clearTimeout(loopTimer);
+  loopTimer=setTimeout(loopOnce,iv);
+}
+setInterval(()=>{
+  if(refreshing)return;
+  const s=Math.max(0,Math.ceil((nextAt-Date.now())/1000));
+  $('countdown').textContent='⟳ '+s+'s';
+},500);
+/* 構成銘柄の騰落(60秒ごと)。8銘柄ずつ分割取得+日足2本から前日比算出 */
+async function refreshQuotes(){
+  const tks=constituentTickers();if(!tks.length)return;
+  const note=$('heat-note');
+  const q={};
+  for(let i=0;i<tks.length;i+=8){
+    const chunk=tks.slice(i,i+8);
+    for(let att=0;att<2;att++){
+      try{
+        const out=await sparkFetch(chunk,'1d','5d');
+        chunk.forEach(tk=>{
+          const o=out[tk];if(!o)return;
+          let prev=(o.pts&&o.pts.length>1)?o.pts[o.pts.length-2].v:null;
+          if(prev==null)prev=o.prev;
+          if(prev>0&&o.price>0)q[tk]={chg:(o.price/prev-1)*100};
+        });
+        break;
+      }catch(e){await sleep(700);}
+    }
+    await sleep(400);
+  }
+  const fresh=Object.keys(q).length;
+  if(fresh){
+    /* 前回値とマージ: 一部チャンク失敗でも歯抜けにしない */
+    quotes=Object.assign({},quotes,q);
+    try{localStorage.setItem('nnav_quotes',JSON.stringify({q:quotes,at:Date.now()}));}catch(e){}
+    renderHoldingsMix();
+  }
+  const known=Object.keys(quotes).length;
+  if(note){
+    note.textContent=fresh
+      ?'面積=実質保有比率、色=当日騰落。ホバーで詳細。騰落更新: '+new Date().toLocaleTimeString('ja-JP')+' ('+known+'/'+tks.length+'銘柄)'
+      :(known?'回線不調: 前回の騰落を表示中('+known+'/'+tks.length+')。60秒後に再取得。':'騰落データ取得失敗。60秒後に再試行。');
+  }
+  /* 大変動アラート(実データで±3%以上) */
+  const mv=$('movers');
+  if(mv){
+    const movers=Object.entries(quotes).filter(en=>Math.abs(en[1].chg)>=3)
+      .sort((a,b)=>Math.abs(b[1].chg)-Math.abs(a[1].chg)).slice(0,3);
+    mv.innerHTML=movers.length?'🔥'+movers.map(en=>`<b class="${en[1].chg>=0?'up-t':'dn-t'}">${en[0]} ${fmtPct(en[1].chg)}</b>`).join(''):'';
+  }
+}
+/* 先読み: リベース用の1Yを最優先→他期間 */
+async function prefetchRanges(){
+  const syms=[...new Set([...holdings.map(h=>h.symbol),FXSYM])];
+  for(const sym of syms){try{await ensureRange(sym,'1Y');}catch(e){}await sleep(1000);}
+  for(const h of holdings){
+    if(h.fundCd&&(h.baseIdxDate==null||h.baseIdxDate==='prev')){
+      try{const f=await fetchFundNav(h.fundCd);await rebaseHolding(h,f);}catch(e){}
+    }
+  }
+  compute();
+  for(const rk of ['6M','3M','1M','5D']){
+    for(const sym of syms){
+      try{await ensureRange(sym,rk);}catch(e){}
+      await sleep(1200);
+    }
+  }
+}
+
+/* ============ 計算 ============ */
+function fxNow(){const m=market[FXSYM];return m?m.price:null}
+function fxPrev(){const m=market[FXSYM];return m?m.prev:null}
+function estNav(h){
+  const m=market[h.symbol];if(!m)return null;
+  let v=h.baseNav*(m.price/h.baseIdx);
+  if(h.fxLinked){const f=fxNow();if(f==null)return null;v*=f/h.baseFx;}
+  return v;
+}
+function evalAmt(h){if(h.cash)return h.units;const n=estNav(h);return n==null?null:(h.crypto?n*h.units:n*h.units/10000)}
+function dayChangePct(h){
+  const m=market[h.symbol];if(!m||m.prev==null)return null;
+  let r=m.price/m.prev;
+  if(h.fxLinked&&fxNow()!=null&&fxPrev()!=null)r*=fxNow()/fxPrev();
+  return (r-1)*100;
+}
+function compute(){
+  let total=0,any=false,prevTotal=0;
+  for(const h of holdings){
+    const e=evalAmt(h);
+    if(e!=null){any=true;total+=e;
+      if(h.cash){prevTotal+=e;}
+      else{
+        const d=dayChangePct(h);
+        if(d!=null)prevTotal+=e/(1+d/100);
+      }
+    }
+  }
+  if(!any){renderAssets();return;}
+  totalHistory.push({t:Date.now(),v:total});
+  if(totalHistory.length>3000)totalHistory.shift();
+  const dayDiff=prevTotal>0?total-prevTotal:null;
+  const dayPct=prevTotal>0?(total/prevTotal-1)*100:null;
+  if(lastTotal!=null&&Math.abs(total-lastTotal)>=0.5){
+    const td2=$('tick-delta'),df=total-lastTotal;
+    td2.textContent=(df>=0?'▲ +':'▼ ')+Math.round(df).toLocaleString()+'円';
+    td2.className=(df>=0?'up-t':'dn-t')+' show';
+    clearTimeout(td2._h);td2._h=setTimeout(()=>td2.classList.remove('show'),4000);
+    floatDelta(df);
+    /* コンボ(実データの連続上昇ティックのみ) */
+    if(df>0){combo++;seCoin();}else combo=0;
+    const cEl=$('combo');
+    if(combo>=3){cEl.textContent='⚡COMBO ×'+combo;cEl.classList.add('show');}
+    else cEl.classList.remove('show');
+    if((combo===5||combo===10||combo===20||combo===30)&&Date.now()-lastComboFx>5000){
+      lastComboFx=Date.now();seSession();burst(30+combo*4);
+    }
+  }
+  if(firstCalc){
+    firstCalc=false;sessionHigh=total;
+    if(ath==null){ath={v:total,at:Date.now()};saveAth();}
+    if(dispTotal==null)dispTotal=total;
+    if(msMax===0){const st0=total>=1e7?1e6:1e5;msMax=Math.floor(total/st0)*st0;localStorage.setItem('nnav_ms',String(msMax));}
+  }else{
+    const now=Date.now();
+    if(ath&&total>ath.v){
+      ath={v:total,at:now};saveAth();sessionHigh=total;
+      if(now-lastAthFx>15000){lastAthFx=now;bigEffect('ALL-TIME HIGH','史上最高値更新 // DOPAMINE RELEASED');
+        notify('🧠 史上最高値更新!','推定評価額: '+fmtYen(total));}
+    }else if(total>sessionHigh){
+      sessionHigh=total;
+      if(now-lastSessFx>8000){lastSessFx=now;smallEffect();}
+    }
+    if(goal&&!goal.achieved&&total>=goal.v){
+      goal.achieved=true;saveGoal();
+      bigEffect('GOAL REACHED','目標金額達成 // MISSION COMPLETE');
+      notify('🏆 目標金額達成!',fmtYen(goal.v)+' を突破');
+    }
+    /* キリ番マイルストーン(1000万未満=10万円刻み、以上=100万円刻み)。実データ通過時のみ */
+    const stp=total>=1e7?1e6:1e5;
+    const floorMs=Math.floor(total/stp)*stp;
+    if(msMax===0)msMax=floorMs;
+    else if(floorMs>msMax){
+      const big=floorMs%1e6===0;
+      msMax=floorMs;
+      if(big)bigEffect('MILESTONE',Math.round(floorMs).toLocaleString()+'円 突破');
+      else{smallEffect();notify('💰 キリ番突破',Math.round(floorMs).toLocaleString()+'円を超えた');}
+    }
+    localStorage.setItem('nnav_ms',String(msMax));
+  }
+  lastTotal=total;
+  const td=$('t-day');
+  td.textContent=dayPct==null?'--':((dayDiff>=0?'+':'')+Math.round(dayDiff).toLocaleString()+'円/'+fmtPct(dayPct));
+  td.className=dayPct>=0?'up-t':'dn-t';
+  $('t-shigh').textContent=fmtYen(sessionHigh);
+  $('t-ath').textContent=ath?fmtYen(ath.v):'--';
+  renderComposition(total);renderGoal(total);renderAthRow(total);renderAssets();renderHoldingsMix();
+  drawTotalChart();
+}
+
+/* ============ 基準日一致リベース ============ */
+function closeOnOrBefore(pts,ymd,inclusive){
+  const target=ymd.replace(/(\d{4})(\d{2})(\d{2})/,'$1-$2-$3');
+  let best=null;
+  for(const p of pts){
+    if(!p.d)continue;
+    if(p.d<target||(inclusive&&p.d===target))best=p;else break;
+  }
+  return best;
+}
+async function rebaseHolding(h,f){
+  h.navDate=f.date;h.officialNav=f.nav;h.baseNav=f.nav;
+  let matched=false;
+  try{
+    const idxHist=await ensureRange(h.symbol,'1Y');
+    const bar=closeOnOrBefore(idxHist,f.date,!h.fxLinked);
+    if(bar){h.baseIdx=bar.v;h.baseIdxDate=bar.d;matched=true;}
+    if(h.fxLinked){
+      const fxHist=await ensureRange(FXSYM,'1Y');
+      const fb=closeOnOrBefore(fxHist,f.date,false);
+      if(fb){h.baseFx=fb.v;h.baseFxDate=fb.d;}
+      else if(fxPrev()){h.baseFx=fxPrev();h.baseFxDate='prev';}
+    }
+  }catch(e){}
+  if(!matched){
+    const m=market[h.symbol];
+    if(m){h.baseIdx=(m.prev!=null?m.prev:m.price);h.baseIdxDate='prev';}
+    if(h.fxLinked){h.baseFx=fxPrev()||fxNow()||h.baseFx;h.baseFxDate='prev';}
+  }
+  saveHold();
+}
+async function syncOfficialNavs(){
+  for(const h of holdings){
+    if(!h.fundCd)continue;
+    try{
+      const f=await fetchFundNav(h.fundCd);
+      if(f.date!==h.navDate||h.baseIdxDate==null||h.baseIdxDate==='prev')await rebaseHolding(h,f);
+    }catch(e){}
+  }
+  compute();
+}
+
+/* ============ 表示ヘルパ ============ */
+function fmtYen(v){return v==null?'--':Math.round(v).toLocaleString('ja-JP')+' 円'}
+function fmtPct(v){return (v>=0?'+':'')+v.toFixed(2)+'%'}
+function fmtD(d){return d?String(d).replace(/(\d{4})(\d{2})(\d{2})/,'$1/$2/$3').replace(/-/g,'/'):'--'}
+function fmtDur(ms){const s=Math.max(0,Math.floor(ms/1000));return Math.floor(s/3600)+':'+String(Math.floor(s%3600/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');}
+/* NY市場オープン/クローズまでのカウントダウン(NYSE 2026休場日考慮) */
+const NYSE_HOLIDAYS=new Set(['2026-01-01','2026-01-19','2026-02-16','2026-04-03','2026-05-25','2026-06-19','2026-07-03','2026-09-07','2026-11-26','2026-12-25']);
+function nyCountdown(){
+  const el=$('ny-status');if(!el)return;
+  try{
+    const ny=new Date(new Date().toLocaleString('en-US',{timeZone:'America/New_York'}));
+    const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    const tradingDay=d=>d.getDay()>=1&&d.getDay()<=5&&!NYSE_HOLIDAYS.has(ymd(d));
+    const mins=ny.getHours()*60+ny.getMinutes();
+    if(tradingDay(ny)&&mins>=570&&mins<960){
+      const cl=new Date(ny);cl.setHours(16,0,0,0);
+      el.innerHTML='NY市場: <b class="up-t">OPEN / CLOSEまで '+fmtDur(cl-ny)+'</b>';
+    }else{
+      const nx=new Date(ny);nx.setHours(9,30,0,0);
+      while(nx<=ny||!tradingDay(nx)){nx.setDate(nx.getDate()+1);nx.setHours(9,30,0,0);}
+      el.innerHTML='NY市場: <b>OPENまで '+fmtDur(nx-ny)+'</b>';
+    }
+  }catch(e){}
+}
+function nearestPt(pts,t){
+  if(!pts||!pts.length)return null;
+  let best=null,bd=Infinity;
+  for(const p of pts){const d2=Math.abs(p.t-t);if(d2<bd){bd=d2;best=p;}}
+  return best;
+}
+function animate(){
+  if(lastTotal!=null&&dispTotal!=null){
+    const diff=lastTotal-dispTotal;
+    if(Math.abs(diff)>0.5)dispTotal+=diff*0.08;else dispTotal=lastTotal;
+    const el=$('total-val');
+    el.innerHTML=Math.round(dispTotal).toLocaleString('ja-JP')+'<span class="yen"> 円</span>';
+    el.className=diff>0.5?'up':diff<-0.5?'dn':'';
+  }
+  requestAnimationFrame(animate);
+}
+function renderComposition(total){
+  const bar=$('comp-bar'),leg=$('comp-legend');
+  if(holdings.length<2||!(total>0)){bar.style.display='none';leg.innerHTML='';return;}
+  bar.style.display='flex';
+  let bh='',lh='';
+  for(const h of holdings){
+    const e=evalAmt(h);if(e==null)continue;
+    const pct=e/total*100;
+    bh+=`<div class="seg" style="width:${pct}%;background:${h.color}" title="${h.name}: ${fmtYen(e)} (${pct.toFixed(1)}%)"></div>`;
+    lh+=`<div class="li"><span class="dot" style="background:${h.color}"></span>${h.name} <b>${fmtYen(e)}</b> <span class="pct">${pct.toFixed(1)}%</span></div>`;
+  }
+  bar.innerHTML=bh;leg.innerHTML=lh;
+}
+function renderGoal(total){
+  const w=$('goal-wrap');
+  if(!goal||!(goal.v>0)){w.style.display='none';return;}
+  w.style.display='block';
+  const pct=Math.min(total/goal.v*100,100);
+  $('goal-fill').style.width=pct+'%';
+  $('goal-txt').textContent=fmtYen(total)+' / '+fmtYen(goal.v)+' ('+pct.toFixed(1)+'%)'+(goal.achieved?' ✦':'');
+}
+/* 史上最高値までの距離メーター */
+function renderAthRow(total){
+  const row=$('ath-row');
+  if(!ath||!(ath.v>0)||total==null||total>=ath.v){row.style.display='none';return;}
+  row.style.display='flex';
+  const pct=Math.min(total/ath.v*100,100);
+  $('ath-fill').style.width=pct+'%';
+  $('ath-fill').classList.toggle('hot',pct>=99.5);
+  $('ath-txt').textContent='あと '+Math.round(ath.v-total).toLocaleString()+'円 ('+pct.toFixed(2)+'%)';
+}
+/* 実ティック差分の浮遊表示 */
+function floatDelta(df){
+  if(Math.abs(df)<1)return;
+  const el=document.createElement('div');
+  el.className='fdelta '+(df>=0?'up':'dn');
+  el.textContent=(df>=0?'+':'')+Math.round(df).toLocaleString()+'円';
+  el.style.left=(28+Math.random()*44)+'%';
+  $('total-panel').appendChild(el);
+  setTimeout(()=>el.remove(),2600);
+}
+
+/* ============ 総合チャート(全銘柄の時刻和集合+直前値保持で合成) ============ */
+async function drawTotalChart(){
+  const cv=$('total-chart');
+  const intraday=totalRange==='1H'||totalRange==='1D';
+  try{
+    const series=[];let cashSum=0;
+    for(const h of holdings){
+      if(h.cash){cashSum+=h.units;continue;}
+      const pts=await getSeriesFor(h.symbol,totalRange);
+      if(pts&&pts.length>1)series.push({h,pts});
+    }
+    if(!series.length){
+      drawChart(cv,totalHistory,{stroke:'#00f0ff'});
+      $('tcs').textContent='データ待機中(蓄積値表示)';
+      return;
+    }
+    const needFx=series.some(sr=>sr.h.fxLinked);
+    let fxPts=null;
+    if(needFx){
+      try{fxPts=await getSeriesFor(FXSYM,totalRange);}catch(e){}
+      if(!fxPts||fxPts.length<2){const fm=market[FXSYM];fxPts=fm&&fm.pts&&fm.pts.length>1?fm.pts:null;}
+    }
+    /* 時刻グリッド=全銘柄の和集合。休場中の銘柄・為替は直前値を保持(BTC等24h銘柄との混在対応) */
+    let grid=[...new Set([].concat.apply([],series.map(sr=>sr.pts.map(p=>p.t))))].sort((a,b)=>a-b);
+    const startT=Math.max.apply(null,series.map(sr=>sr.pts[0].t));
+    grid=grid.filter(t=>t>=startT);
+    if(grid.length>600){const step=Math.ceil(grid.length/600);grid=grid.filter((_,i)=>i%step===0);}
+    const iters=series.map(sr=>({h:sr.h,pts:sr.pts,i:-1}));
+    const fxIt=fxPts?{pts:fxPts,i:-1}:null;
+    const out=[];
+    for(const t of grid){
+      let sum=cashSum,ok=true;
+      if(fxIt)while(fxIt.i+1<fxIt.pts.length&&fxIt.pts[fxIt.i+1].t<=t)fxIt.i++;
+      for(const it of iters){
+        while(it.i+1<it.pts.length&&it.pts[it.i+1].t<=t)it.i++;
+        if(it.i<0){ok=false;break;}
+        const p=it.pts[it.i],h=it.h;
+        let v=h.baseNav*(p.v/h.baseIdx);
+        if(h.fxLinked){
+          let fv=(fxIt&&fxIt.i>=0)?fxIt.pts[fxIt.i].v:(fxNow()||h.baseFx);
+          v*=fv/h.baseFx;
+        }
+        sum+=h.crypto?v*h.units:v*h.units/10000;
+      }
+      if(ok)out.push({t,v:sum});
+    }
+    if(out.length<2){drawChart(cv,totalHistory,{stroke:'#00f0ff'});$('tcs').textContent='期間データ不足';return;}
+    drawChart(cv,out,{stroke:'#00f0ff',labels:true});
+    const t0=new Date(out[0].t),t1=new Date(out[out.length-1].t);
+    const fmt=intraday?(d)=>d.toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):(d)=>d.toLocaleDateString('ja-JP');
+    $('tcs').textContent='推定評価額換算(実データ・休場中銘柄は直前値保持'+(cashSum>0?'・現金含む':'')+') / '+fmt(t0)+'〜'+fmt(t1)+(intraday?' / 自動更新':'');
+  }catch(e){$('tcs').textContent='期間データ取得中/失敗... 再選択で再試行';}
+}
+
+/* ============ 銘柄パネル ============ */
+function renderAssets(){
+  const main=$('cards');
+  if(holdings.length===0){
+    main.innerHTML='<div id="empty">NO ASSETS REGISTERED<br><br><b>[+ 銘柄追加]</b> から登録。オルカン/S&P500/NASDAQ100は公式基準価額を自動取得。</div>';
+    return;
+  }
+  const emp=document.getElementById('empty');if(emp)emp.remove();
+  let total=0;holdings.forEach(h=>{const e=evalAmt(h);if(e)total+=e;});
+  for(const h of holdings){
+    if(h.cash)continue; /* 現金はパネル非表示(合計・構成比のみ) */
+    let p=document.getElementById('ap-'+h.id);
+    if(!p){
+      p=document.createElement('div');p.className='apanel';p.id='ap-'+h.id;
+      main.appendChild(p);
+    }
+    p.style.borderLeftColor=h.color;
+    p.classList.toggle('mini',!!h.crypto);
+    const m=market[h.symbol],n=estNav(h),e=evalAmt(h),d=dayChangePct(h);
+    const rk=rangeSel[h.id]||'1D';
+    const dayAmt=(d!=null&&e!=null)?e-e/(1+d/100):null;
+    let tickCls0='';
+    if(n!=null&&prevEst[h.id]!=null){
+      if(n>prevEst[h.id]+0.005)tickCls0='tick-up';
+      else if(n<prevEst[h.id]-0.005)tickCls0='tick-dn';
+    }
+    if(h.crypto){
+      /* 仮想通貨: コンパクトパネル(価格=円/1単位を自動取得) */
+      if(n!=null)prevEst[h.id]=n;
+      const pnlC=(h.costNav&&n!=null)?(n-h.costNav)*h.units:null;
+      p.innerHTML=`
+      <div class="ap-head">
+        <div><h3>${h.name}</h3>
+          <div class="sym">${h.symbol}${m?' ['+m.src+']':''} × USD/JPY</div></div>
+        <div class="ap-nav">
+          <span class="big ${tickCls0}" style="color:${d==null?'#fff':d>=0?'var(--grn)':'var(--mag)'}">${n==null?'NO SIGNAL':Math.round(n).toLocaleString()+' 円'}</span>
+          <span class="chg ${d>=0?'up-t':'dn-t'}">${d==null?'':fmtPct(d)+(dayAmt!=null?' / '+(dayAmt>=0?'+':'')+Math.round(dayAmt).toLocaleString()+'円':'')}</span>
+        </div>
+        <div class="ap-btns"><button class="btn" data-edit="${h.id}">編集</button></div>
+      </div>
+      <div class="mini-stats"><span>評価額<b>${e==null?'--':Math.round(e).toLocaleString()+' 円'}</b></span><span>保有数量<b>${h.units}</b></span>${pnlC!=null?'<span>損益<b class="'+(pnlC>=0?'up-t':'dn-t')+'">'+(pnlC>=0?'+':'')+Math.round(pnlC).toLocaleString()+'円 ('+fmtPct((n/h.costNav-1)*100)+')</b></span>':''}</div>
+      <div class="ap-chart">
+        <div class="rtabs">${Object.keys(RANGES).map(r=>`<button data-range="${r}" data-hid="${h.id}" class="${r===rk?'on':''}">${r}</button>`).join('')}</div>
+        <canvas id="ch-${h.id}"></canvas>
+        <div class="csrc" id="cs-${h.id}"></div>
+      </div>`;
+      drawAssetChart(h);
+      continue;
+    }
+    const pnl=(h.costNav&&n!=null)?(n-h.costNav)*h.units/10000:null;
+    const offDiff=(h.officialNav&&n!=null)?(n/h.officialNav-1)*100:null;
+    let tickCls='';
+    if(n!=null&&prevEst[h.id]!=null){
+      if(n>prevEst[h.id]+0.005)tickCls='tick-up';
+      else if(n<prevEst[h.id]-0.005)tickCls='tick-dn';
+    }
+    if(n!=null)prevEst[h.id]=n;
+    const stats=[
+      ['保有比率',(e&&total>0)?(e/total*100).toFixed(1)+'%':'--'],
+      ['公式NAV比(本日変動見込み)',offDiff==null?'--':fmtPct(offDiff)],
+      ['指数現在値',m?m.price.toLocaleString('en-US',{maximumFractionDigits:2}):'--'],
+      ['指数前日終値',m&&m.prev!=null?m.prev.toLocaleString('en-US',{maximumFractionDigits:2}):'--'],
+      ['USD/JPY',h.fxLinked?(fxNow()?fxNow().toFixed(3):'--'):'円建て'],
+      ['公式基準価額',h.officialNav?h.officialNav.toLocaleString()+'円('+fmtD(h.navDate)+')':h.baseNav.toLocaleString()+'円(手動)'],
+      ['計算基準(指数/為替)',(h.baseIdxDate?fmtD(h.baseIdxDate):'--')+(h.fxLinked&&h.baseFxDate?' / '+fmtD(h.baseFxDate):'')],
+      ['保有口数',h.units.toLocaleString()+' 口'],
+    ];
+    if(pnl!=null)stats.push(['損益',(pnl>=0?'+':'')+Math.round(pnl).toLocaleString()+'円('+fmtPct((n/h.costNav-1)*100)+')']);
+    if(m&&m.time)stats.push(['指数データ時刻',new Date(m.time).toLocaleTimeString('ja-JP')]);
+    p.innerHTML=`
+      <div class="ap-head">
+        <div><h3>${h.name}</h3>
+          <div class="sym">${h.symbol}${h.fxLinked?' × USD/JPY':''}${m?' ['+m.src+']':''}${h.fundCd?' ◈公式NAV自動':''}</div></div>
+        <div class="ap-nav">
+          <span class="big ${tickCls}" style="color:${d==null?'#fff':d>=0?'var(--grn)':'var(--mag)'}">${n==null?'NO SIGNAL':n.toLocaleString('ja-JP',{minimumFractionDigits:2,maximumFractionDigits:2})+' 円'}</span>
+          <span class="chg ${d>=0?'up-t':'dn-t'}">${d==null?'':fmtPct(d)+(dayAmt!=null?' / '+(dayAmt>=0?'+':'')+Math.round(dayAmt).toLocaleString()+'円':'')}</span>
+          <span class="ev">評価額 <b>${e==null?'--':Math.round(e).toLocaleString()}</b> 円</span>
+        </div>
+        <div class="ap-btns">
+          <button class="btn yel" data-rebase="${h.id}">基準更新</button>
+          <button class="btn" data-edit="${h.id}">編集</button>
+        </div>
+      </div>
+      <div class="ap-body">
+        <div class="stats-mini">${stats.map(s=>`<div class="stat"><div class="k">${s[0]}</div><div class="v">${s[1]}</div></div>`).join('')}</div>
+        <div class="ap-chart">
+          <div class="rtabs">${Object.keys(RANGES).map(r=>`<button data-range="${r}" data-hid="${h.id}" class="${r===rk?'on':''}">${r}</button>`).join('')}</div>
+          <canvas id="ch-${h.id}"></canvas>
+          <div class="csrc" id="cs-${h.id}"></div>
+        </div>
+      </div>`;
+    drawAssetChart(h);
+  }
+  [...main.querySelectorAll('.apanel')].forEach(c=>{
+    if(!holdings.some(h=>'ap-'+h.id===c.id))c.remove();
+  });
+}
+async function drawAssetChart(h){
+  const cv=document.getElementById('ch-'+h.id),cs=document.getElementById('cs-'+h.id);
+  if(!cv)return;
+  const rk=rangeSel[h.id]||'1D';
+  const intraday=rk==='1H'||rk==='1D';
+  const m=market[h.symbol],d=dayChangePct(h);
+  let pts=null,note='';
+  const cached=rk==='1D'||(histCache[h.symbol+'|'+rk]&&Date.now()-histCache[h.symbol+'|'+rk].at<(RANGE_TTL[rk]||15*60*1000));
+  if(!cached&&cs)cs.textContent='取得中...(初回は数秒〜十数秒)';
+  try{
+    pts=await getSeriesFor(h.symbol,rk);
+    if(document.getElementById('ch-'+h.id)!==cv)return;
+  }catch(e){note='期間データ取得失敗(再選択で再試行)';}
+  if(pts&&pts.length>1){
+    let fxPts=null,fxMap=null;
+    if(h.fxLinked){
+      if(intraday){
+        if(rk==='1H'){try{fxPts=await ensureRange(FXSYM,'1H');}catch(e){}}
+        if(!fxPts){const fm=market[FXSYM];if(fm&&fm.pts&&fm.pts.length>1)fxPts=fm.pts;}
+      }else{
+        const c=histCache[FXSYM+'|'+rk];
+        if(c){fxPts=c.pts;fxMap=new Map(c.pts.filter(q=>q.d).map(q=>[q.d,q.v]));}
+      }
+    }
+    const fNow=fxNow()||h.baseFx;
+    const est=pts.map(p=>{
+      let fv=h.fxLinked?fNow:1;
+      if(h.fxLinked&&fxMap&&p.d&&fxMap.has(p.d))fv=fxMap.get(p.d);
+      else if(h.fxLinked&&fxPts){const fp=nearestPt(fxPts,p.t);if(fp&&Math.abs(fp.t-p.t)<(intraday?36e5:864e5))fv=fp.v;}
+      return {t:p.t,v:h.baseNav*(p.v/h.baseIdx)*(h.fxLinked?fv/h.baseFx:1)};
+    });
+    const baseline=(rk==='1D'&&m&&m.prev!=null)?h.baseNav*(m.prev/h.baseIdx)*(h.fxLinked&&fxPrev()?fxPrev()/h.baseFx:1):null;
+    drawChart(cv,est,{stroke:d>=0?'#00ff9f':'#ff2a6d',base:baseline,labels:true});
+    const t0=new Date(pts[0].t),t1=new Date(pts[pts.length-1].t);
+    const fmt=intraday?(dt)=>dt.toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):(dt)=>dt.toLocaleDateString('ja-JP');
+    note='推定基準価額換算 / '+(m?m.src:'')+' / '+fmt(t0)+'〜'+fmt(t1)+(rk==='1D'?' / 黄点線=前日終値相当':'');
+  }else if(!note)note='データ待機中...';
+  if(cs)cs.textContent=note;
+}
+
+/* ============ ツリーマップ(squarified) & TOP10 ============ */
+function combinedWeights(){
+  let total=0;const shares=[];
+  for(const h of holdings){
+    const key=FUND_KEY[h.fundCd]||SYM_KEY[h.symbol];
+    const e=evalAmt(h)||h.baseNav*h.units/10000;
+    if(key&&e>0){shares.push([key,e]);total+=e;}
+  }
+  if(!total)return null;
+  const agg={};
+  for(const sh of shares){
+    const key=sh[0],w0=sh[1]/total;
+    for(const c of CONSTITUENTS[key]){
+      const tk=c[0];
+      if(!agg[tk])agg[tk]={tk,nm:c[1],w:0,sec:c[3]};
+      agg[tk].w+=c[2]*w0;
+    }
+  }
+  return Object.values(agg).sort((a,b)=>b.w-a.w);
+}
+function heatColor(chg){
+  if(chg==null)return 'rgba(40,50,80,.5)';
+  const x=Math.max(-3,Math.min(3,chg))/3;
+  return x>=0?`rgba(0,220,140,${0.15+0.55*x})`:`rgba(255,42,109,${0.15+0.55*(-x)})`;
+}
+function squarify(children,x,y,w,h,out){
+  if(!children.length)return;
+  if(children.length===1){out.push({x,y,w,h,it:children[0].it});return;}
+  const horiz=w>=h;
+  const len=horiz?h:w;
+  let i=1,best=Infinity;
+  while(i<=children.length){
+    const row=children.slice(0,i);
+    const s=row.reduce((a,b)=>a+b.a,0);
+    const side=s/len;
+    let mx=0;
+    for(const r of row){
+      const o=r.a/side;
+      const ratio=Math.max(side/o,o/side);
+      if(ratio>mx)mx=ratio;
+    }
+    if(mx<=best){best=mx;i++;}else break;
+  }
+  const rowN=Math.max(1,i-1);
+  const row=children.slice(0,rowN);
+  const s=row.reduce((a,b)=>a+b.a,0);
+  const side=s/len||1;
+  let off=0;
+  for(const r of row){
+    const l=r.a/side;
+    if(horiz)out.push({x,y:y+off,w:side,h:l,it:r.it});
+    else out.push({x:x+off,y,w:l,h:side,it:r.it});
+    off+=l;
+  }
+  if(horiz)squarify(children.slice(rowN),x+side,y,Math.max(w-side,0),h,out);
+  else squarify(children.slice(rowN),x,y+side,w,Math.max(h-side,0),out);
+}
+function renderHoldingsMix(){
+  const list=combinedWeights();
+  const heat=$('heat'),tp=$('top10');
+  if(!list){
+    heat.innerHTML='<div style="color:var(--dim);font-size:11px;padding:16px">対応投信(オルカン/S&P500/NASDAQ100等)を登録すると表示。</div>';
+    tp.innerHTML='';return;
+  }
+  const top=list.slice(0,24);
+  const W=heat.clientWidth||600,H=heat.clientHeight||180;
+  if(W>10&&H>10){
+    const totalW=top.reduce((a,b)=>a+b.w,0)||1;
+    const children=top.map(it=>({it,a:it.w/totalW*W*H}));
+    const out=[];
+    squarify(children,0,0,W,H,out);
+    heat.innerHTML=out.map(r=>{
+      const s=r.it,q=quotes[s.tk];
+      const fs=Math.max(8,Math.min(r.w/(s.tk.length*0.72),r.h/2.6,15));
+      const showCh=r.h>=30&&r.w>=42;
+      return `<div class="htile" style="left:${r.x.toFixed(1)}px;top:${r.y.toFixed(1)}px;width:${Math.max(r.w-2,2).toFixed(1)}px;height:${Math.max(r.h-2,2).toFixed(1)}px;background:${heatColor(q&&q.chg)}" title="${s.nm} [${SECTORS[s.sec]||''}] 実質${s.w.toFixed(2)}%${q?' 前日比'+fmtPct(q.chg):''}">
+        <div class="tk" style="font-size:${fs.toFixed(1)}px">${s.tk}</div>
+        ${showCh?`<div class="ch" style="font-size:${Math.max(8,fs*0.72).toFixed(1)}px">${q?fmtPct(q.chg):'--'}</div>`:''}</div>`;
+    }).join('');
+  }
+  tp.innerHTML='<table><tr><th>#</th><th>銘柄</th><th>ｾｸﾀｰ</th><th>実質比率</th><th>前日比</th></tr>'+
+    list.slice(0,10).map((s,i)=>{
+      const q=quotes[s.tk];
+      return `<tr><td>${i+1}</td><td><span class="tk">${s.tk}</span> ${s.nm}</td><td style="font-size:9px;color:var(--lbl)">${SECTORS[s.sec]||''}</td><td>${s.w.toFixed(2)}%</td>
+        <td class="${q?(q.chg>=0?'up-t':'dn-t'):''}">${q?fmtPct(q.chg):'--'}</td></tr>`;
+    }).join('')+'</table>';
+}
+if('ResizeObserver' in window){
+  let hrt=null;
+  new ResizeObserver(()=>{clearTimeout(hrt);hrt=setTimeout(renderHoldingsMix,250);}).observe(document.getElementById('heat'));
+}
+
+/* ============ 経済指標カレンダー & ニュース ============ */
+const FLAGS={USD:'🇺🇸',JPY:'🇯🇵',EUR:'🇪🇺',GBP:'🇬🇧',CNY:'🇨🇳',AUD:'🇦🇺',CAD:'🇨🇦',CHF:'🇨🇭',NZD:'🇳🇿'};
+async function refreshCalendar(){
+  const wrap=$('cal-in');
+  try{
+    const now=Date.now();
+    /* これからの予定のみ(直近2時間前まで含む)。スクロールバーは使わず自動で流す */
+    const evs=(await fetchCalendar()).filter(e=>new Date(e.date).getTime()>now-2*36e5);
+    evs.sort((a,b)=>new Date(a.date)-new Date(b.date));
+    if(!evs.length){
+      wrap.className='';
+      wrap.innerHTML='<span class="cal-chip">今週の重要指標は終了。日曜に来週分を取得。</span>';
+      return;
+    }
+    const chips=evs.map((e,i)=>{
+      const dt=new Date(e.date);
+      const wd='日月火水木金土'[dt.getDay()];
+      const lbl=(dt.getMonth()+1)+'/'+dt.getDate()+'('+wd+') '+dt.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+      const cls=(e.impact==='High'?'hi':'med')+(i===0?' next':'');
+      const tip=e.title+' / 予想:'+(e.forecast||'--')+' 前回:'+(e.previous||'--');
+      return `<span class="cal-chip ${cls}" title="${tip}">${lbl} ${FLAGS[e.country]||e.country} ${e.title}${e.impact==='High'?' ★':''}</span>`;
+    }).join('');
+    const many=evs.length>5;
+    wrap.className=many?'scroll':'';
+    wrap.innerHTML=many?chips+chips:chips;
+    if(many)wrap.style.setProperty('--caldur',Math.max(35,evs.length*7)+'s');
+  }catch(e){
+    wrap.className='';
+    wrap.innerHTML='<span class="cal-chip">取得失敗(回線診断で確認)</span>';
+  }
+}
+async function refreshNews(){
+  const el=$('news-in');
+  try{
+    const titles=await fetchNews();
+    if(!titles.length)throw new Error('NO_NEWS');
+    el.textContent=titles.join('　◆　');
+    el.style.animationDuration=Math.max(40,titles.join('').length*0.42)+'s';
+    el.style.animation='none';void el.offsetWidth;
+    el.style.animation='';
+  }catch(e){el.textContent='ニュース取得失敗(回線診断で確認)';}
+}
+
+/* ============ Fear & Greed ============ */
+const FG_JP={'extreme fear':'極度の恐怖','fear':'恐怖','neutral':'中立','greed':'強欲','extreme greed':'極度の強欲'};
+const FG_COL=s=>s<25?'#ff2a6d':s<45?'#ff9e00':s<55?'#f9f002':s<75?'#9dff5c':'#00ff9f';
+function renderFG(){
+  const svg=$('fg-gauge');
+  if(!fgData){$('fg-rating').textContent='--';return;}
+  const s=fgData.score;
+  const zones=[[0,25,'#ff2a6d'],[25,45,'#ff9e00'],[45,55,'#f9f002'],[55,75,'#9dff5c'],[75,100,'#00ff9f']];
+  const arc=(a0,a1,color)=>{
+    const r=78,cx=100,cy=104;
+    const p=a=>{const rad=(180-a*1.8)*Math.PI/180;return [cx+r*Math.cos(rad),cy-r*Math.sin(rad)];};
+    const p0=p(a0),p1=p(a1);
+    return `<path d="M${p0[0].toFixed(1)},${p0[1].toFixed(1)} A78,78 0 0 1 ${p1[0].toFixed(1)},${p1[1].toFixed(1)}" stroke="${color}" stroke-width="14" fill="none" opacity=".85"/>`;
+  };
+  const rad=(180-s*1.8)*Math.PI/180;
+  const nx=100+44*Math.cos(rad),ny=104-44*Math.sin(rad);
+  svg.innerHTML=zones.map(z=>arc(z[0],z[1],z[2])).join('')+
+    `<line x1="100" y1="104" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}" stroke="#fff" stroke-width="3"/>
+     <circle cx="100" cy="104" r="5" fill="#fff"/>
+     <text x="100" y="78" text-anchor="middle" font-size="26" font-weight="900" fill="${FG_COL(s)}" stroke="#05060f" stroke-width="5" paint-order="stroke" font-family="Orbitron">${s}</text>
+     <text x="12" y="118" font-size="8" fill="#3a4266">EXTREME FEAR</text>
+     <text x="188" y="118" font-size="8" fill="#3a4266" text-anchor="end">EXTREME GREED</text>`;
+  const rEl=$('fg-rating');
+  rEl.textContent=(FG_JP[fgData.rating]||fgData.rating||'').toUpperCase();
+  rEl.style.color=FG_COL(s);rEl.style.textShadow='0 0 10px '+FG_COL(s);
+  $('fg-rows').innerHTML=[['前日',fgData.prevClose],['1週間前',fgData.w1],['1ヶ月前',fgData.m1],['1年前',fgData.y1]]
+    .map(r=>`<div>${r[0]}<b style="color:${FG_COL(r[1])}">${Math.round(r[1])}</b></div>`).join('');
+  if(fgData.hist&&fgData.hist.length>2){
+    const step=Math.max(1,Math.floor(fgData.hist.length/150));
+    drawChart($('fg-hist'),fgData.hist.filter((_,i)=>i%step===0),{stroke:FG_COL(s)});
+  }
+}
+async function refreshFG(){
+  try{
+    fgData=await fetchFearGreed();
+    try{localStorage.setItem('nnav_fg',JSON.stringify({d:fgData,at:Date.now()}));}catch(e){}
+    renderFG();
+  }catch(e){}
+}
+
+/* ============ ローテーション情報パネル(F&G/VIX/マクロ/指数) ============ */
+const EXTRAS=['^VIX','^TNX','GC=F','BTC-USD','^N225','YM=F'];
+let extras={};
+try{const ex=JSON.parse(localStorage.getItem('nnav_extras')||'null');if(ex&&ex.d&&Date.now()-ex.at<3*864e5)extras=ex.d;}catch(e){}
+const ROT=[
+  {t:'FEAR &amp; GREED INDEX // CNN',b:'fg-body'},
+  {t:'VIX // 恐怖指数',b:'vix-body'},
+  {t:'MACRO // 為替・金利・金・BTC',b:'macro-body'},
+  {t:'INDICES // 世界の指数',b:'idx-body'},
+];
+let rotIdx=0,rotPaused=false;
+function renderRot(){
+  ROT.forEach((r,i)=>{const el=$(r.b);if(el)el.classList.toggle('on',i===rotIdx);});
+  $('rot-title').innerHTML=ROT[rotIdx].t+'<span class="dots">'+ROT.map((_,i)=>`<span class="${i===rotIdx?'on':''}" data-rot="${i}"></span>`).join('')+'</span>';
+  if(rotIdx===0)renderFG();
+  else if(rotIdx===1)renderVix();
+  else if(rotIdx===2)renderMacro();
+  else renderIdx();
+}
+function mcell(k,v,c,cls){return `<div class="mcell"><div class="k">${k}</div><div class="v">${v}</div><div class="c ${cls}">${c}</div></div>`;}
+function renderVix(){
+  const v=extras['^VIX'],el=$('vix-num'),ze=$('vix-zone');
+  if(!v){el.textContent='--';ze.textContent='データ待ち';return;}
+  const z=v.price<15?['凪 // COMPLACENT','#00ff9f']:v.price<20?['平常 // NORMAL','#9dff5c']:v.price<30?['警戒 // NERVOUS','#ff9e00']:['恐怖 // PANIC','#ff2a6d'];
+  el.textContent=v.price.toFixed(2);
+  el.style.color=z[1];el.style.textShadow='0 0 16px '+z[1];
+  ze.textContent=z[0]+(v.chg!=null?' / '+fmtPct(v.chg):'');ze.style.color=z[1];
+  if(v.pts&&v.pts.length>1)drawChart($('vix-chart'),v.pts,{stroke:z[1],labels:true});
+}
+function renderMacro(){
+  const g=$('macro-grid');let h='';
+  const fx=fxNow(),fp=fxPrev();
+  h+=mcell('USD/JPY',fx?fx.toFixed(3):'--',(fx&&fp)?fmtPct((fx/fp-1)*100):'',(fx>=fp)?'up-t':'dn-t');
+  const tn=extras['^TNX'];
+  h+=mcell('米10年債利回り',tn?(tn.price/10).toFixed(3)+'%':'--',(tn&&tn.prev)?(((tn.price-tn.prev)>=0?'+':'')+((tn.price-tn.prev)*10).toFixed(1)+'bp'):'',(tn&&tn.price>=tn.prev)?'up-t':'dn-t');
+  const gc=extras['GC=F'];
+  h+=mcell('金先物','$'+(gc?gc.price.toLocaleString('en-US',{maximumFractionDigits:1}):'--'),(gc&&gc.chg!=null)?fmtPct(gc.chg):'',(gc&&gc.chg>=0)?'up-t':'dn-t');
+  const bt=extras['BTC-USD'];
+  h+=mcell('ビットコイン','$'+(bt?Math.round(bt.price).toLocaleString():'--'),(bt&&bt.chg!=null)?fmtPct(bt.chg):'',(bt&&bt.chg>=0)?'up-t':'dn-t');
+  g.innerHTML=h;
+}
+function renderIdx(){
+  const g=$('idx-grid');let h='';
+  for(const r of [['S&P500先物','ES=F'],['NASDAQ100先物','NQ=F'],['日経平均','^N225'],['NYダウ先物','YM=F']]){
+    const m=market[r[1]]||extras[r[1]];
+    const chg=(m&&m.prev)?(m.price/m.prev-1)*100:null;
+    h+=mcell(r[0],m?m.price.toLocaleString('en-US',{maximumFractionDigits:2}):'--',chg!=null?fmtPct(chg):'',chg>=0?'up-t':'dn-t');
+  }
+  g.innerHTML=h;
+}
+async function refreshExtras(){
+  try{
+    const out=await sparkFetch(EXTRAS,'1d','5d');
+    EXTRAS.forEach(s=>{
+      const o=out[s];if(!o)return;
+      const prev=(o.pts&&o.pts.length>1)?o.pts[o.pts.length-2].v:o.prev;
+      extras[s]={price:o.price,prev,chg:prev>0?(o.price/prev-1)*100:null,pts:o.pts};
+    });
+    try{localStorage.setItem('nnav_extras',JSON.stringify({d:extras,at:Date.now()}));}catch(e){}
+    renderRot();
+  }catch(e){}
+}
+$('rot-title').addEventListener('click',e=>{
+  const d=e.target.closest('[data-rot]');
+  if(d){rotIdx=+d.dataset.rot;renderRot();}
+});
+$('fg-panel').addEventListener('mouseenter',()=>rotPaused=true);
+$('fg-panel').addEventListener('mouseleave',()=>rotPaused=false);
+setInterval(()=>{if(!rotPaused){rotIdx=(rotIdx+1)%ROT.length;renderRot();}},12000);
+
+/* ============ チャート描画 ============ */
+function drawChart(cv,pts,opt){
+  opt=opt||{};const stroke=opt.stroke||'#00f0ff';
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||300,hh=cv.clientHeight||60;
+  if(!w||!hh)return;
+  cv.width=w*dpr;cv.height=hh*dpr;
+  const c=cv.getContext('2d');c.scale(dpr,dpr);c.clearRect(0,0,w,hh);
+  if(!pts||pts.length<2){c.fillStyle='#2a3050';c.font='11px monospace';c.fillText('AWAITING DATA...',8,hh/2);return;}
+  let mn=Infinity,mx=-Infinity;
+  for(const p of pts){if(p.v<mn)mn=p.v;if(p.v>mx)mx=p.v;}
+  if(opt.base!=null){mn=Math.min(mn,opt.base);mx=Math.max(mx,opt.base);}
+  const pad=(mx-mn)*0.1||Math.abs(mx)*0.001||1;mn-=pad;mx+=pad;
+  const X=i=>4+i/(pts.length-1)*(w-8),Y=v=>hh-5-(v-mn)/(mx-mn)*(hh-10);
+  if(opt.base!=null){
+    c.strokeStyle='rgba(249,240,2,.4)';c.setLineDash([4,4]);c.beginPath();
+    c.moveTo(0,Y(opt.base));c.lineTo(w,Y(opt.base));c.stroke();c.setLineDash([]);
+  }
+  c.beginPath();
+  pts.forEach((p,i)=>i?c.lineTo(X(i),Y(p.v)):c.moveTo(X(i),Y(p.v)));
+  c.strokeStyle=stroke;c.lineWidth=1.6;c.shadowColor=stroke;c.shadowBlur=9;c.stroke();
+  c.shadowBlur=0;
+  c.lineTo(X(pts.length-1),hh);c.lineTo(X(0),hh);c.closePath();
+  const g=c.createLinearGradient(0,0,0,hh);
+  g.addColorStop(0,stroke+'40');g.addColorStop(1,'rgba(0,0,0,0)');
+  c.fillStyle=g;c.fill();
+  if(opt.labels){
+    c.fillStyle='#8a93b8';c.font='10px monospace';
+    c.fillText(Math.round(mx-pad).toLocaleString(),6,12);
+    c.fillText(Math.round(mn+pad).toLocaleString(),6,hh-8);
+  }
+  const last=pts[pts.length-1];
+  c.beginPath();c.arc(X(pts.length-1),Y(last.v),3,0,7);
+  c.fillStyle='#fff';c.shadowColor=stroke;c.shadowBlur=10;c.fill();c.shadowBlur=0;
+}
+
+/* ============ SE & エフェクト & 通知 ============ */
+let actx=null;
+function audio(){if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)();if(actx.state==='suspended')actx.resume();return actx;}
+function tone(f,at,dur,type,vol,dest,slide){
+  const ctx=audio(),o=ctx.createOscillator(),g=ctx.createGain();
+  o.type=type;o.frequency.setValueAtTime(f,at);
+  if(slide)o.frequency.exponentialRampToValueAtTime(slide,at+dur*0.9);
+  g.gain.setValueAtTime(0,at);
+  g.gain.linearRampToValueAtTime(vol,at+0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001,at+dur);
+  o.connect(g);g.connect(dest||ctx.destination);
+  o.start(at);o.stop(at+dur+0.05);
+  return o;
+}
+function seATH(){
+  if(!seOn)return;
+  try{
+    const ctx=audio(),t=ctx.currentTime+0.04;
+    const comp=ctx.createDynamicsCompressor();
+    comp.threshold.value=-18;comp.ratio.value=8;comp.connect(ctx.destination);
+    const master=ctx.createGain();master.gain.value=0.95;master.connect(comp);
+    const dly=ctx.createDelay(1);dly.delayTime.value=0.22;
+    const fb=ctx.createGain();fb.gain.value=0.42;dly.connect(fb);fb.connect(dly);
+    const wet=ctx.createGain();wet.gain.value=0.38;dly.connect(wet);wet.connect(comp);
+    const bus=ctx.createGain();bus.connect(master);bus.connect(dly);
+    const len=ctx.sampleRate*0.6,buf=ctx.createBuffer(1,len,ctx.sampleRate),dt=buf.getChannelData(0);
+    for(let i=0;i<len;i++)dt[i]=(Math.random()*2-1)*(i/len);
+    const nz=ctx.createBufferSource();nz.buffer=buf;
+    const bp=ctx.createBiquadFilter();bp.type='bandpass';bp.Q.value=1.1;
+    bp.frequency.setValueAtTime(300,t);bp.frequency.exponentialRampToValueAtTime(7500,t+0.55);
+    const ng=ctx.createGain();ng.gain.setValueAtTime(0.15,t);ng.gain.linearRampToValueAtTime(0,t+0.6);
+    nz.connect(bp);bp.connect(ng);ng.connect(bus);nz.start(t);
+    tone(180,t,0.55,'sawtooth',0.07,bus,900);
+    const ko=ctx.createOscillator(),kg=ctx.createGain();
+    ko.frequency.setValueAtTime(170,t+0.55);ko.frequency.exponentialRampToValueAtTime(38,t+0.8);
+    kg.gain.setValueAtTime(0.55,t+0.55);kg.gain.exponentialRampToValueAtTime(0.001,t+0.95);
+    ko.connect(kg);kg.connect(master);ko.start(t+0.55);ko.stop(t+1);
+    const cl=ctx.sampleRate*1.1,cb=ctx.createBuffer(1,cl,ctx.sampleRate),cd=cb.getChannelData(0);
+    for(let i=0;i<cl;i++)cd[i]=(Math.random()*2-1)*Math.pow(1-i/cl,2.2);
+    const cr=ctx.createBufferSource();cr.buffer=cb;
+    const hp=ctx.createBiquadFilter();hp.type='highpass';hp.frequency.value=5000;
+    const cg=ctx.createGain();cg.gain.value=0.16;
+    cr.connect(hp);hp.connect(cg);cg.connect(bus);cr.start(t+0.55);
+    const sub=ctx.createOscillator(),sg=ctx.createGain();
+    sub.type='sine';sub.frequency.setValueAtTime(85,t+0.55);sub.frequency.exponentialRampToValueAtTime(30,t+1.7);
+    sg.gain.setValueAtTime(0.3,t+0.55);sg.gain.exponentialRampToValueAtTime(0.001,t+1.8);
+    sub.connect(sg);sg.connect(master);sub.start(t+0.55);sub.stop(t+1.9);
+    const pent=[1567.98,1760,2093,2349.32,2637.02,3135.96,3520];
+    let ct=t+0.65,gap=0.11;
+    for(let i=0;i<24;i++){
+      const f=pent[(Math.random()*pent.length)|0];
+      tone(f*1.02,ct,0.16,'triangle',0.075,bus,f);
+      tone(f*2,ct+0.01,0.09,'sine',0.03,bus);
+      ct+=gap;gap=Math.max(0.045,gap*0.93);
+    }
+    const run=[261.63,329.63,392,523.25,659.25,783.99,1046.5,1318.5];
+    run.forEach((f,i)=>{
+      const at=t+0.7+i*0.095;
+      [0.994,1,1.006].forEach(dt2=>tone(f*dt2,at,0.42,'sawtooth',0.045,bus));
+      tone(f*2,at,0.2,'square',0.02,bus);
+    });
+    const ko2=ctx.createOscillator(),kg2=ctx.createGain();
+    ko2.frequency.setValueAtTime(160,t+1.6);ko2.frequency.exponentialRampToValueAtTime(40,t+1.85);
+    kg2.gain.setValueAtTime(0.45,t+1.6);kg2.gain.exponentialRampToValueAtTime(0.001,t+2);
+    ko2.connect(kg2);kg2.connect(master);ko2.start(t+1.6);ko2.stop(t+2.05);
+    const chord=[523.25,659.25,783.99,987.77,1174.66];
+    const lfo=ctx.createOscillator(),lg=ctx.createGain();
+    lfo.frequency.value=5.5;lg.gain.value=5;lfo.connect(lg);lfo.start(t+1.6);lfo.stop(t+4.2);
+    chord.forEach(f=>{
+      [['sawtooth',0.055],['triangle',0.07]].forEach(pair=>{
+        const o=tone(f,t+1.62,2.4,pair[0],pair[1],bus);lg.connect(o.frequency);
+      });
+      tone(f*2,t+1.9,1.8,'sine',0.025,bus);
+    });
+    for(let i=0;i<7;i++){
+      const f=[2093,2637,3135.96,4186][(Math.random()*4)|0];
+      tone(f,t+1.9+Math.random()*1.2,0.5,'sine',0.035,bus);
+    }
+  }catch(e){}
+}
+function seSession(){
+  if(!seOn)return;
+  try{
+    const ctx=audio(),t=ctx.currentTime+0.02;
+    tone(1046.5,t,0.1,'triangle',0.07);
+    tone(1318.5,t+0.07,0.1,'triangle',0.07);
+    tone(1567.98,t+0.14,0.3,'triangle',0.09);
+    tone(3135.96,t+0.16,0.2,'sine',0.03);
+  }catch(e){}
+}
+/* 上昇ティックごとの微コイン音(SE:ON+のみ、実変化のみ) */
+function seCoin(){
+  if(!seOn||!seTick)return;
+  const now=Date.now();if(now-lastCoin<700)return;lastCoin=now;
+  try{
+    const ctx=audio(),t=ctx.currentTime;
+    const f=[2093,2349.32,2637.02][(Math.random()*3)|0];
+    tone(f*1.02,t,0.07,'triangle',0.028,null,f);
+    tone(f*2,t+0.01,0.05,'sine',0.012);
+  }catch(e){}
+}
+function bigEffect(title,sub){
+  seATH();
+  const at=$('ath-text');
+  at.childNodes[0].textContent=title||'ALL-TIME HIGH';
+  at.querySelector('small').textContent=sub||'史上最高値更新 // DOPAMINE RELEASED';
+  $('flash').classList.remove('on');void $('flash').offsetWidth;$('flash').classList.add('on');
+  const ov=$('ath-overlay');ov.classList.remove('on');void ov.offsetWidth;ov.classList.add('on');
+  setTimeout(()=>ov.classList.remove('on'),2700);
+  document.body.classList.remove('shake');void document.body.offsetWidth;document.body.classList.add('shake');
+  burst(260);setTimeout(()=>burst(120),700);setTimeout(()=>burst(80),1400);
+}
+function smallEffect(){
+  seSession();
+  const tp=$('total-panel');tp.classList.remove('pump');void tp.offsetWidth;tp.classList.add('pump');
+  burst(40);
+}
+function notify(title,body){
+  if(!notifyOn||!('Notification' in window)||Notification.permission!=='granted')return;
+  try{new Notification(title,{body});}catch(e){}
+}
+const pcv=$('particles'),pc=pcv.getContext('2d');let parts=[];
+function sizeP(){pcv.width=innerWidth;pcv.height=innerHeight;}
+addEventListener('resize',sizeP);sizeP();
+const PCOLORS=['#00f0ff','#ff2a6d','#f9f002','#00ff9f','#bd00ff','#ffffff'];
+function burst(n){
+  const cx=innerWidth/2,cy=innerHeight/2.4;
+  for(let i=0;i<n;i++){
+    const a=Math.random()*Math.PI*2,s=4+Math.random()*13;
+    parts.push({x:cx,y:cy,vx:Math.cos(a)*s,vy:Math.sin(a)*s-4,life:1,
+      c:PCOLORS[(Math.random()*PCOLORS.length)|0],r:1.5+Math.random()*3});
+  }
+}
+(function ploop(){
+  pc.clearRect(0,0,pcv.width,pcv.height);
+  parts=parts.filter(p=>p.life>0);
+  for(const p of parts){
+    p.x+=p.vx;p.y+=p.vy;p.vy+=0.25;p.vx*=0.99;p.life-=0.016;
+    pc.globalAlpha=Math.max(p.life,0);pc.fillStyle=p.c;
+    pc.shadowColor=p.c;pc.shadowBlur=8;
+    pc.fillRect(p.x,p.y,p.r,p.r*2.2);
+  }
+  pc.globalAlpha=1;pc.shadowBlur=0;
+  requestAnimationFrame(ploop);
+})();
+
+/* ============ 銘柄追加・編集 ============ */
+function fillPresets(){
+  $('a-preset').innerHTML=PRESETS.map(p=>`<option value="${p.s}">${p.n}${p.s!=='__custom'?' ['+p.s+']':''}</option>`).join('');
+}
+/* 仮想通貨モード: -USD/-USDT/-JPY で終わるシンボルは数量ベース入力に切替 */
+function isCryptoSym(s){return /-(USD|USDT|JPY)$/i.test((s||'').trim());}
+function cryptoUI(){
+  const sym=$('a-preset').value==='__custom'?$('a-custom').value.trim():$('a-preset').value;
+  const cash=sym==='__cash';
+  const c=!cash&&isCryptoSym(sym);
+  $('a-fund-f').style.display=(c||cash)?'none':'block';
+  $('a-fundcd-wrap').style.display=(!c&&!cash&&$('a-fund').value==='__code')?'block':'none';
+  $('a-nav-f').style.display=(c||cash)?'none':'block';
+  $('a-fx-f').style.display=(c||cash)?'none':'block';
+  $('a-cost-label').parentElement.style.display=cash?'none':'block';
+  const hint=$('a-crypto-hint');
+  hint.style.display=(c||cash)?'block':'none';
+  hint.textContent=cash
+    ?'現金モード: 金額を入れるだけ。値動きなしで合計・構成比・過去チャートに常時反映(パネルは作られない)。'
+    :'仮想通貨モード: 価格(円換算)は自動取得。保有数量を入れるだけでOK。';
+  $('a-units-label').textContent=cash?'金額(円)':(c?'保有数量(BTC等・小数可)':'保有口数(口)');
+  $('a-cost-label').textContent=c?'取得単価(円/1単位・任意。入れると損益表示)':'取得単価(円/万口・任意)';
+}
+$('a-preset').addEventListener('change',()=>{
+  const v=$('a-preset').value;
+  $('a-custom-wrap').style.display=v==='__custom'?'block':'none';
+  const p=PRESETS.find(x=>x.s===v);if(p&&v!=='__custom')$('a-fx').checked=p.fx;
+  cryptoUI();
+});
+$('a-custom').addEventListener('input',cryptoUI);
+async function onFundSelect(){
+  const v=$('a-fund').value;
+  $('a-fundcd-wrap').style.display=v==='__code'?'block':'none';
+  const hint=$('a-fund-hint');
+  const cd=v==='__code'?$('a-fundcd').value.trim():v;
+  if(!cd){hint.className='hint';hint.textContent='選ぶと名前・連動指数・基準価額が自動セットされる。';return;}
+  hint.className='hint';hint.textContent='公式基準価額を取得中...';
+  try{
+    const f=await fetchFundNav(cd);
+    $('a-name').value=f.name;
+    $('a-nav').value=f.nav;
+    const def=FUND_DEFAULT[cd];
+    if(def){$('a-preset').value=def.sym;$('a-fx').checked=def.fx;$('a-custom-wrap').style.display='none';}
+    hint.className='hint ok';
+    hint.textContent='✓ 公式基準価額 '+f.nav.toLocaleString()+'円 ('+fmtD(f.date)+'時点)を自動取得。以後も毎日自動更新。';
+  }catch(e){
+    hint.className='hint ng';
+    hint.textContent='✗ 取得失敗。コード確認か手動入力で。';
+  }
+}
+$('a-fund').addEventListener('change',onFundSelect);
+$('a-fundcd').addEventListener('change',onFundSelect);
+$('btn-add').addEventListener('click',()=>{editingId=null;openAdd();});
+function openAdd(h){
+  $('m-add-title').textContent=h?'EDIT ASSET // 銘柄編集':'ADD ASSET // 銘柄追加';
+  $('a-delete').style.display=h?'inline-block':'none';
+  $('a-save').textContent=h?'更新':'登録';
+  $('a-name').value=h?h.name:'';
+  $('a-fund').value=h&&h.fundCd?(FUND_DEFAULT[h.fundCd]?h.fundCd:'__code'):'';
+  $('a-fundcd-wrap').style.display=(h&&h.fundCd&&!FUND_DEFAULT[h.fundCd])?'block':'none';
+  $('a-fundcd').value=h&&h.fundCd?h.fundCd:'';
+  $('a-fund-hint').className='hint';
+  $('a-fund-hint').textContent='選ぶと名前・連動指数・基準価額が自動セットされる。';
+  if(h){
+    const inPreset=PRESETS.some(p=>p.s===h.symbol);
+    $('a-preset').value=inPreset?h.symbol:'__custom';
+    $('a-custom-wrap').style.display=inPreset?'none':'block';
+    $('a-custom').value=inPreset?'':h.symbol;
+    $('a-fx').checked=h.fxLinked;
+    $('a-nav').value=h.baseNav;$('a-units').value=h.units;$('a-cost').value=h.costNav||'';
+  }else{
+    $('a-preset').value='ES=F';$('a-custom-wrap').style.display='none';
+    $('a-custom').value='';$('a-fx').checked=true;
+    $('a-nav').value='';$('a-units').value='';$('a-cost').value='';
+  }
+  cryptoUI();
+  $('m-add').classList.add('open');
+}
+$('a-cancel').addEventListener('click',()=>$('m-add').classList.remove('open'));
+$('a-delete').addEventListener('click',()=>{
+  if(editingId&&confirm('この銘柄を削除する?')){
+    holdings=holdings.filter(h=>h.id!==editingId);saveHold();
+    $('m-add').classList.remove('open');
+    renderAssets();compute();renderHoldingsMix();
+  }
+});
+$('a-save').addEventListener('click',async()=>{
+  const name=$('a-name').value.trim();
+  let sym=$('a-preset').value;
+  if(sym==='__custom')sym=$('a-custom').value.trim();
+  const fxL=$('a-fx').checked;
+  const nav=parseFloat($('a-nav').value),units=parseFloat($('a-units').value);
+  const cost=parseFloat($('a-cost').value)||null;
+  const fv=$('a-fund').value;
+  const fundCd=fv==='__code'?($('a-fundcd').value.trim()||null):(fv||null);
+  /* 現金: 通信不要で即登録 */
+  if(sym==='__cash'){
+    if(!name||!(units>0)){alert('表示名と金額(円)を入力して。');return;}
+    if(editingId){
+      const h0=holdings.find(x=>x.id===editingId);
+      Object.assign(h0,{name,symbol:'__cash',cash:true,crypto:false,fxLinked:false,units,costNav:null,fundCd:null,baseNav:1,baseIdx:1,baseFx:1});
+    }else{
+      holdings.push({id:'h'+Date.now(),name,symbol:'__cash',cash:true,crypto:false,fxLinked:false,
+        baseNav:1,baseIdx:1,baseFx:1,units,costNav:null,fundCd:null,
+        color:COLORS[holdings.length%COLORS.length],createdAt:Date.now()});
+    }
+    saveHold();$('m-add').classList.remove('open');
+    renderAssets();compute();
+    return;
+  }
+  const isC=isCryptoSym(sym);
+  if(!name||!sym||!(units>0)||(!isC&&!(nav>0))){
+    alert(isC?'表示名・シンボル・保有数量を入力して。':'投信名・連動指数・基準価額・口数を入力して。');return;
+  }
+  $('a-save').textContent='取得中...';$('a-save').disabled=true;
+  try{
+    const okIdx=await updateSymbol(sym);
+    if(!okIdx)throw new Error('IDX');
+    if((fxL||isC)&&!market[FXSYM]){
+      const okFx=await updateSymbol(FXSYM);
+      if(!okFx)throw new Error('FX');
+    }
+    const m=market[sym];
+    let h;
+    if(editingId){
+      h=holdings.find(x=>x.id===editingId);
+      const rebase=h.symbol!==sym||(!isC&&(h.fxLinked!==fxL||h.baseNav!==nav))||h.fundCd!==(isC?null:fundCd)||!!h.crypto!==isC;
+      Object.assign(h,{name,symbol:sym,units,costNav:cost,crypto:isC,
+        fxLinked:isC?true:fxL,fundCd:isC?null:fundCd});
+      if(rebase){
+        if(isC){h.baseNav=1;h.baseIdx=1;h.baseFx=1;h.baseIdxDate=null;h.navDate=null;h.officialNav=null;}
+        else{h.baseNav=nav;h.baseIdx=m.price;h.baseFx=fxL?fxNow():1;h.baseIdxDate=null;h.navDate=null;}
+      }
+    }else{
+      h={id:'h'+Date.now(),name,symbol:sym,crypto:isC,fxLinked:isC?true:fxL,
+        baseNav:isC?1:nav,units,costNav:cost,
+        baseIdx:isC?1:m.price,baseFx:isC?1:(fxL?fxNow():1),fundCd:isC?null:fundCd,
+        color:COLORS[holdings.length%COLORS.length],createdAt:Date.now()};
+      holdings.push(h);
+    }
+    saveHold();$('m-add').classList.remove('open');
+    if(h.fundCd){
+      try{const f=await fetchFundNav(h.fundCd);await rebaseHolding(h,f);}catch(e){}
+    }
+    renderAssets();compute();refreshQuotes();
+  }catch(e){
+    alert('「'+sym+'」のデータを全経路で取得できなかった。[回線診断]で確認を。');
+  }
+  $('a-save').textContent=editingId?'更新':'登録';$('a-save').disabled=false;
+});
+$('cards').addEventListener('click',async e=>{
+  const rt=e.target.closest('[data-range]');
+  if(rt){
+    rangeSel[rt.dataset.hid]=rt.dataset.range;
+    const h=holdings.find(x=>x.id===rt.dataset.hid);
+    const panel=document.getElementById('ap-'+rt.dataset.hid);
+    if(panel)panel.querySelectorAll('.rtabs button').forEach(b=>b.classList.toggle('on',b.dataset.range===rt.dataset.range));
+    if(h)drawAssetChart(h);
+    return;
+  }
+  const rb=e.target.closest('[data-rebase]');
+  if(rb){
+    const h=holdings.find(x=>x.id===rb.dataset.rebase);if(!h)return;
+    if(h.fundCd){
+      rb.textContent='取得中...';
+      try{const f=await fetchFundNav(h.fundCd);await rebaseHolding(h,f);compute();}
+      catch(err){alert('公式基準価額の取得に失敗。');}
+      return;
+    }
+    const v=prompt('最新の公式基準価額(円/万口)を入力。現在の指数・為替を新基準として記録。',Math.round(estNav(h)||h.baseNav));
+    const nv=parseFloat(v);
+    if(nv>0&&market[h.symbol]){
+      h.baseNav=nv;h.baseIdx=market[h.symbol].price;h.baseIdxDate=null;
+      if(h.fxLinked&&fxNow())h.baseFx=fxNow();
+      saveHold();compute();
+    }
+    return;
+  }
+  const ed=e.target.closest('[data-edit]');
+  if(ed){
+    const h=holdings.find(x=>x.id===ed.dataset.edit);
+    if(h){editingId=h.id;openAdd(h);}
+  }
+});
+function fillTotalTabs(){
+  $('t-rtabs').innerHTML=Object.keys(RANGES).map(r=>`<button data-trange="${r}" class="${r===totalRange?'on':''}">${r}</button>`).join('');
+}
+$('t-rtabs').addEventListener('click',e=>{
+  const b=e.target.closest('[data-trange]');if(!b)return;
+  totalRange=b.dataset.trange;
+  fillTotalTabs();
+  if(totalRange!=='1D'&&totalRange!=='1H')$('tcs').textContent='取得中...(初回は数秒〜十数秒)';
+  drawTotalChart();
+});
+
+/* ============ 回線診断 ============ */
+$('btn-diag').addEventListener('click',()=>$('m-diag').classList.add('open'));
+$('status').addEventListener('click',()=>$('m-diag').classList.add('open'));
+$('diag-close').addEventListener('click',()=>$('m-diag').classList.remove('open'));
+$('btn-info').addEventListener('click',()=>$('m-info').classList.add('open'));
+$('info-close').addEventListener('click',()=>$('m-info').classList.remove('open'));
+$('diag-run').addEventListener('click',runDiag);
+async function diagOne(label,fn){
+  const t0=performance.now();
+  try{await fn();return {label,ok:true,ms:Math.round(performance.now()-t0)};}
+  catch(e){return {label,ok:false,ms:Math.round(performance.now()-t0),err:(e&&e.message||'ERR').slice(0,40)};}
+}
+async function runDiag(){
+  const tbl=$('diag-table');
+  tbl.innerHTML='<tr><td>診断中...(最大25秒)</td></tr>';
+  const yUrl='https://query1.finance.yahoo.com/v8/finance/chart/USDJPY%3DX?interval=2m&range=1d';
+  const tests=[];
+  PROXIES.forEach((p,i)=>tests.push(diagOne('Yahoo × '+PXN[i],async()=>{
+    const ctl=new AbortController();setTimeout(()=>ctl.abort(),15000);
+    const r=await fetch(p(yUrl),{cache:'no-store',signal:ctl.signal});
+    const t2=await r.text();if(!r.ok||!vYahoo(t2))throw new Error('内容不正');
+  })));
+  tests.push(diagOne('Yahoo spark(一括取得)',()=>sparkFetch([FXSYM],'1d','1d')));
+  tests.push(diagOne('Yahoo spark(構成銘柄8)',()=>sparkFetch(['NVDA','MSFT','AAPL','AMZN','META','AVGO','GOOGL','TSLA'],'1d','5d')));
+  tests.push(diagOne('三菱UFJアセマネAPI(公式NAV)',()=>fetchFundNav('253425')));
+  tests.push(diagOne('Binance(BTC)',()=>fetchVia('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT','binance',{validate:t=>t.includes('lastPrice')})));
+  tests.push(diagOne('ExchangeRate-API(為替日次)',()=>fetchVia('https://open.er-api.com/v6/latest/USD','erapi',{validate:t=>t.includes('JPY')})));
+  tests.push(diagOne('CNN Fear&Greed',()=>fetchFearGreed()));
+  tests.push(diagOne('経済指標(ForexFactory)',()=>fetchCalendarFF()));
+  tests.push(diagOne('経済指標(TradingView予備)',()=>fetchCalendarTV()));
+  tests.push(diagOne('経済指標(Myfxbook予備2)',()=>fetchCalendarMFB()));
+  tests.push(diagOne('ニュースRSS(NHK/CNBC)',()=>fetchNews()));
+  const rs=await Promise.all(tests);
+  tbl.innerHTML=rs.map(r=>`<tr><td>${r.label}</td><td class="${r.ok?'ok':'ng'}">${r.ok?'OK':'NG'}</td><td>${r.ms}ms${r.ok?'':' '+(r.err||'')}</td></tr>`).join('');
+  $('diag-note').textContent=rs.some(r=>r.ok)?'OKの経路が自動優先される(成功経路は記憶)。':'全滅。ネットワークのブロックを確認。';
+}
+
+/* ============ 保存・設定 ============ */
+function saveHold(){localStorage.setItem('nnav_holdings',JSON.stringify(holdings));}
+function saveSnap(){
+  try{
+    const m={};
+    for(const s of symbols()){const x=market[s];if(x)m[s]={price:x.price,prev:x.prev,time:x.time,src:(x.src||'').replace('*','')};}
+    localStorage.setItem('nnav_snap',JSON.stringify({market:m,at:Date.now()}));
+  }catch(e){}
+}
+let histSaveT=null;
+function saveHistLS(){
+  clearTimeout(histSaveT);
+  histSaveT=setTimeout(()=>{
+    try{
+      const out={};
+      for(const k in histCache)if(!k.endsWith('|1H'))out[k]=histCache[k];
+      localStorage.setItem('nnav_hist',JSON.stringify(out));
+    }catch(e){}
+  },1500);
+}
+function saveAth(){localStorage.setItem('nnav_ath',JSON.stringify(ath));}
+function saveGoal(){localStorage.setItem('nnav_goal',JSON.stringify(goal));}
+$('btn-goal').addEventListener('click',()=>{
+  const v=prompt('目標金額(円)。達成で全画面エフェクト+SE。空欄で解除。',goal?goal.v:'');
+  if(v===null)return;
+  const nv=parseFloat(String(v).replace(/[,、]/g,''));
+  goal=(nv>0)?{v:nv,achieved:lastTotal!=null&&lastTotal>=nv}:null;
+  saveGoal();renderGoal(lastTotal||0);
+});
+function seLabel(){$('btn-sound').textContent='SE:'+(seOn?(seTick?'ON+':'ON'):'OFF');
+  $('btn-sound').title='OFF→ON→ON+(上昇ティックごとにコイン音)の3段階';}
+$('btn-sound').addEventListener('click',()=>{
+  if(!seOn){seOn=true;seTick=false;}
+  else if(!seTick){seTick=true;}
+  else{seOn=false;seTick=false;}
+  localStorage.setItem('nnav_se',seOn?'on':'off');
+  localStorage.setItem('nnav_setick',seTick?'on':'off');
+  seLabel();if(seOn)audio();
+});
+seLabel();
+$('btn-notify').addEventListener('click',async()=>{
+  if(!notifyOn){
+    if(!('Notification' in window)){alert('このブラウザは通知非対応。');return;}
+    const p=await Notification.requestPermission();
+    if(p!=='granted'){alert('通知が許可されなかった。');return;}
+    notifyOn=true;
+  }else notifyOn=false;
+  localStorage.setItem('nnav_notify',notifyOn?'on':'off');
+  $('btn-notify').textContent='通知:'+(notifyOn?'ON':'OFF');
+});
+$('btn-notify').textContent='通知:'+(notifyOn?'ON':'OFF');
+$('btn-test').addEventListener('click',()=>{const was=seOn;seOn=true;bigEffect();seOn=was;});
+$('sel-int').value=localStorage.getItem('nnav_int')||'10000';
+$('sel-int').addEventListener('change',()=>{
+  localStorage.setItem('nnav_int',$('sel-int').value);
+  loopOnce();
+});
+$('btn-export').addEventListener('click',()=>{
+  const blob=new Blob([JSON.stringify({holdings,ath,goal},null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='neuro-nav-backup.json';a.click();
+});
+$('btn-import').addEventListener('click',()=>$('import-file').click());
+$('import-file').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  const rd=new FileReader();
+  rd.onload=()=>{try{
+    const j=JSON.parse(rd.result);
+    if(Array.isArray(j.holdings)){holdings=j.holdings;saveHold();}
+    if(j.ath){ath=j.ath;saveAth();}
+    if(j.goal){goal=j.goal;saveGoal();}
+    location.reload();
+  }catch(err){alert('読み込み失敗: '+err.message);}};
+  rd.readAsText(f);
+});
+document.querySelectorAll('.modal-bg').forEach(mb=>mb.addEventListener('click',e=>{
+  if(e.target===mb)mb.classList.remove('open');
+}));
+setInterval(()=>{$('clock').textContent=new Date().toLocaleTimeString('ja-JP',{hour12:false});nyCountdown();},1000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)loopOnce();});
+
+/* ============ 起動 ============ */
+/* 前回セッションのキャッシュで即描画(ソース名に*付き)→裏で最新に更新 */
+try{
+  const snap=JSON.parse(localStorage.getItem('nnav_snap')||'null');
+  if(snap&&snap.market&&Date.now()-snap.at<3*864e5){
+    for(const s in snap.market)market[s]=Object.assign({pts:[]},snap.market[s],{src:(snap.market[s].src||'Yahoo')+'*'});
+    $('status-txt').textContent='前回値で表示中 // 更新中...';
+    $('led').className='warn';
+  }
+  const qs=JSON.parse(localStorage.getItem('nnav_quotes')||'null');
+  if(qs&&qs.q&&Date.now()-qs.at<3*864e5)quotes=qs.q;
+  const fgc=JSON.parse(localStorage.getItem('nnav_fg')||'null');
+  if(fgc&&fgc.d&&Date.now()-fgc.at<2*864e5)fgData=fgc.d;
+  const hc=JSON.parse(localStorage.getItem('nnav_hist')||'null');
+  if(hc)for(const k in hc){if(hc[k]&&Date.now()-hc[k].at<12*3600*1000)histCache[k]=hc[k];}
+}catch(e){}
+fillPresets();fillTotalTabs();renderAssets();animate();renderRot();
+if(Object.keys(market).length)compute();
+(async()=>{
+  await refresh();
+  await syncOfficialNavs();
+  refreshQuotes();refreshFG();refreshCalendar();refreshNews();refreshExtras();
+  setTimeout(prefetchRanges,4000);
+})();
+loopOnce();
+setInterval(syncOfficialNavs,30*60*1000);
+setInterval(refreshQuotes,60*1000);
+setInterval(refreshExtras,60*1000);
+setInterval(refreshFG,15*60*1000);
+setInterval(refreshCalendar,6*60*60*1000);
+setInterval(refreshNews,10*60*1000);
+</script>
+</body>
+</html>
