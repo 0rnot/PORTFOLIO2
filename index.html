@@ -571,15 +571,15 @@ body.closing{animation:crtoff .28s forwards}
   <section id="fg-panel" class="panelbox">
     <h2 id="rot-title">FEAR & GREED INDEX // CNN</h2>
     <div id="rot-wrap">
-    <div id="fg-body" class="rot-body on">
-      <div id="fg-left">
-        <svg id="fg-gauge" viewBox="0 0 200 120"></svg>
-        <div id="fg-rating">--</div>
+    <div id="fg-body" class="rot-body on" style="flex-direction:column;gap:3px">
+      <div style="display:flex;align-items:center;gap:12px;flex:none;width:100%;justify-content:center">
+        <svg id="fg-gauge" viewBox="0 0 200 120" style="width:150px;flex:none"></svg>
+        <div style="flex:none">
+          <div id="fg-rating">--</div>
+          <div id="fg-rows" style="margin-top:5px"></div>
+        </div>
       </div>
-      <div id="fg-right">
-        <div id="fg-rows"></div>
-        <canvas id="fg-hist"></canvas>
-      </div>
+      <canvas id="fg-hist" style="flex:1;width:100%;min-height:36px"></canvas>
     </div>
     <div id="vix-body" class="rot-body">
       <div id="vix-left"><div id="vix-num">--</div><div id="vix-zone">--</div></div>
@@ -631,13 +631,13 @@ body.closing{animation:crtoff .28s forwards}
 <!-- ===== 市場タブ ===== -->
 <div id="page-mkt" class="page">
   <section class="panelbox" id="pm1"><h2>FEAR &amp; GREED // CNN(拡大)</h2>
-    <div style="display:flex;gap:12px;flex:1;min-height:0;align-items:center">
-      <svg id="mkt-fg" viewBox="0 0 200 120" style="flex:1;min-width:0;max-width:440px"></svg>
-      <div style="flex:1;min-width:0;display:flex;flex-direction:column;align-self:stretch">
-        <div id="mkt-fg-rows" class="mgrid" style="flex:none;grid-auto-rows:auto"></div>
-        <div class="pctl" id="mkt-fg-ctl" style="margin-top:6px"></div>
-        <canvas id="mkt-fg-hist" style="flex:1;min-height:60px"></canvas>
+    <div style="display:flex;flex-direction:column;gap:5px;flex:1;min-height:0">
+      <div style="display:flex;gap:14px;align-items:center;justify-content:center;flex:none">
+        <svg id="mkt-fg" viewBox="0 0 200 120" style="width:min(44%,320px);flex:none"></svg>
+        <div id="mkt-fg-rows" class="mgrid" style="grid-auto-rows:auto;flex:none;width:44%"></div>
       </div>
+      <div class="pctl" id="mkt-fg-ctl" style="margin-bottom:0"></div>
+      <canvas id="mkt-fg-hist" style="flex:1;min-height:70px"></canvas>
     </div></section>
   <section class="panelbox" id="pm2"><h2>VIX // 恐怖指数(過去5日・30分足)</h2>
     <div id="mkt-vix-top" style="flex:none;display:flex;gap:14px;align-items:baseline;margin-bottom:4px"></div>
@@ -2686,9 +2686,15 @@ function seriesEstNav(h,rk){
   const fxc=histCache[FXSYM+'|'+rk];
   const fxMap=(h.fxLinked&&fxc)?new Map(fxc.pts.filter(p=>p.d).map(p=>[p.d,p.v])):null;
   const fN=fxNow()||h.baseFx;
+  /* 為替は日付一致→なければ直前値を保持(現在値混入による人工的な段差を防ぐ) */
+  let lastFx=null;
   return c.pts.map(p=>{
     let fv=1;
-    if(h.fxLinked)fv=((fxMap&&fxMap.get(p.d))||fN)/h.baseFx;
+    if(h.fxLinked){
+      const mv=fxMap?fxMap.get(p.d):null;
+      if(mv!=null)lastFx=mv;
+      fv=((lastFx!=null)?lastFx:fN)/h.baseFx;
+    }
     return {t:p.t,d:p.d,v:h.baseNav*(p.v/h.baseIdx)*fv};
   });
 }
