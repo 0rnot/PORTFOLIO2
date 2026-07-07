@@ -117,7 +117,7 @@ h1.glitch::after{color:var(--grn);clip-path:inset(60% 0 10% 0);animation:gl2 3.1
 @keyframes pump{30%{box-shadow:0 0 60px rgba(0,255,159,.8)}}
 .tp-label{font-size:10px;letter-spacing:3px;color:var(--dim);flex:none}
 #tv-row{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;flex:none}
-#total-val{font-family:'Orbitron';font-weight:900;font-size:clamp(24px,3vw,42px);letter-spacing:1px;
+#total-val{font-family:'Orbitron';font-weight:900;font-size:clamp(30px,3.6vw,54px);letter-spacing:1px;
   color:#fff;text-shadow:0 0 18px var(--cyan);line-height:1.05;transition:color .3s}
 #total-val.up{color:var(--grn);text-shadow:0 0 22px var(--grn)}
 #total-val.dn{color:var(--mag);text-shadow:0 0 22px var(--mag)}
@@ -138,7 +138,7 @@ h1.glitch::after{color:var(--grn);clip-path:inset(60% 0 10% 0);animation:gl2 3.1
 #ath-txt{flex:none;color:var(--lbl)}
 #movers{float:right;font-size:10px;letter-spacing:0;font-family:'Share Tech Mono'}
 #movers b{font-weight:normal;margin-left:6px}
-#total-sub{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;flex:none;margin-top:2px}
+#total-sub{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;flex:none;margin-top:2px}
 #total-sub b{color:var(--yel);font-weight:normal}
 .up-t{color:var(--grn)!important} .dn-t{color:var(--mag)!important}
 #comp-bar{display:flex;height:9px;margin-top:5px;border:1px solid rgba(0,240,255,.25);overflow:hidden;flex:none}
@@ -158,7 +158,7 @@ h1.glitch::after{color:var(--grn);clip-path:inset(60% 0 10% 0);animation:gl2 3.1
 .rtabs button{background:transparent;border:1px solid var(--dim);color:var(--dim);
   font-family:inherit;font-size:10px;padding:2px 7px;cursor:pointer}
 .rtabs button.on{border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 8px rgba(0,240,255,.4)}
-.csrc{font-size:9px;color:var(--dim);margin-top:2px;flex:none}
+.csrc{font-size:10px;color:var(--dim);margin-top:2px;flex:none}
 
 /* 銘柄パネル */
 .apanel{background:var(--panel);border:1px solid rgba(0,240,255,.22);border-left:4px solid var(--cyan);
@@ -168,7 +168,7 @@ h1.glitch::after{color:var(--grn);clip-path:inset(60% 0 10% 0);animation:gl2 3.1
 .ap-head h3{font-family:'Orbitron';font-size:13px;color:#fff;letter-spacing:1px}
 .ap-head .sym{font-size:10px;color:var(--pur);margin-top:1px}
 .ap-nav{margin-left:auto;text-align:right}
-.ap-nav .big{font-family:'Orbitron';font-size:clamp(17px,1.5vw,24px);font-weight:700;transition:background .3s;padding:0 4px}
+.ap-nav .big{font-family:'Orbitron';font-size:clamp(20px,2vw,32px);font-weight:700;transition:background .3s;padding:0 4px}
 .ap-nav .big.tick-up{background:rgba(0,255,159,.22)}
 .ap-nav .big.tick-dn{background:rgba(255,42,109,.22)}
 .ap-nav .chg{display:block;font-size:11px;margin-top:1px}
@@ -177,10 +177,10 @@ h1.glitch::after{color:var(--grn);clip-path:inset(60% 0 10% 0);animation:gl2 3.1
 @media(max-width:900px){.ap-body{grid-template-columns:1fr}}
 .stats-mini{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:minmax(36px,1fr);gap:4px;overflow-y:auto}
 .stat{background:#070a18;border:1px solid rgba(0,240,255,.15);padding:3px 8px;display:flex;flex-direction:column;justify-content:center;min-width:0}
-.stat .k{font-size:8px;color:var(--dim);letter-spacing:1px;white-space:nowrap;overflow:hidden}
-.stat .v{font-size:13px;margin-top:1px;color:#fff;white-space:nowrap;overflow:hidden}
-.ap-nav .ev{display:block;font-size:11px;color:var(--lbl);margin-top:3px}
-.ap-nav .ev b{font-family:'Orbitron';font-size:15px;color:#e8ecff;text-shadow:0 0 8px rgba(154,166,208,.45)}
+.stat .k{font-size:9px;color:var(--dim);letter-spacing:1px;white-space:nowrap;overflow:hidden}
+.stat .v{font-size:15px;margin-top:1px;color:#fff;white-space:nowrap;overflow:hidden}
+.ap-nav .ev{display:block;font-size:12px;color:var(--lbl);margin-top:3px}
+.ap-nav .ev b{font-family:'Orbitron';font-size:19px;color:#e8ecff;text-shadow:0 0 8px rgba(154,166,208,.45)}
 .ap-chart{display:flex;flex-direction:column;min-height:0}
 .ap-chart canvas{flex:1;width:100%;min-height:60px;display:block}
 #empty{text-align:center;padding:40px 20px;border:1px dashed var(--dim);color:var(--dim)}
@@ -194,12 +194,12 @@ h1.glitch::after{color:var(--grn);clip-path:inset(60% 0 10% 0);animation:gl2 3.1
 .htile .ch{color:#fff;text-shadow:0 0 4px #000;line-height:1.1}
 #top10-panel{overflow:hidden}
 #top10{flex:1;overflow-y:auto}
-#top10 table{width:100%;border-collapse:collapse;font-size:11px}
+#top10 table{width:100%;border-collapse:collapse;font-size:12.5px}
 #top10 td,#top10 th{padding:2px 5px;border-bottom:1px solid rgba(0,240,255,.1);text-align:right;white-space:nowrap}
 #top10 td:nth-child(2),#top10 th:nth-child(2){text-align:left}
 #top10 th{color:var(--dim);font-weight:normal;font-size:9px;position:sticky;top:0;background:var(--panel)}
 #top10 .tk{color:var(--cyan)}
-.note{font-size:8px;color:var(--dim);margin-top:3px;flex:none}
+.note{font-size:9.5px;color:var(--dim);margin-top:3px;flex:none}
 
 /* ローテーションパネル(F&G/VIX/マクロ/指数): スライド切替 */
 #rot-wrap{position:relative;flex:1;min-height:0;overflow:hidden}
@@ -399,7 +399,7 @@ body.closing{animation:crtoff .28s forwards}
 @media(min-width:1200px){
   .page.on{display:grid;height:calc(100vh - 44px);grid-template-columns:repeat(12,1fr);grid-template-rows:1fr 1fr;overflow:hidden}
   #pa1{grid-column:1/5}#pa2{grid-column:5/13}#pa3{grid-column:1/7}#pa4{grid-column:7/13}
-  #pm1{grid-column:1/7}#pm2{grid-column:7/13}#pm3{grid-column:1/8}#pm4{grid-column:8/13}
+  #pm1{grid-column:1/5}#pm2{grid-column:5/9}#pm4{grid-column:9/13;grid-row:1}#pm3{grid-column:1/13;grid-row:2}
   #pl1{grid-column:1/8}#pl2{grid-column:8/13}#pl3{grid-column:1/5}#pl4{grid-column:5/13}
 }
 @media(max-width:1199px){
@@ -437,8 +437,28 @@ body.closing{animation:crtoff .28s forwards}
 .msn.ok{border-color:rgba(0,255,159,.45)}
 .msn.ok span{color:var(--grn)}
 .msn b{margin-left:auto;color:var(--yel);font-weight:normal;font-size:10px}
-.dsub{display:flex;justify-content:space-between;font-size:11px;margin-top:5px;color:var(--lbl)}
-.dsub b{color:#fff;font-weight:normal}
+.dsub{display:flex;justify-content:space-between;font-size:12px;margin-top:5px;color:var(--lbl)}
+.dsub b{color:#fff;font-weight:normal;font-size:13px}
+/* 音量スライダー */
+#vol{width:74px;height:26px;accent-color:#00f0ff;background:transparent;cursor:pointer}
+/* クレジット */
+#credit{font-family:'Orbitron';font-size:9px;letter-spacing:2px;color:var(--dim);text-decoration:none;
+  border:1px solid rgba(58,66,102,.6);padding:3px 8px;transition:.2s;
+  clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)}
+#credit:hover{color:var(--cyan);border-color:var(--cyan);text-shadow:0 0 8px var(--cyan);box-shadow:0 0 12px rgba(0,240,255,.35)}
+/* ローテDDパネル */
+#rot-dd-left{flex:none;text-align:center;padding:0 12px}
+#rot-dd-num{font-family:'Orbitron';font-weight:900;font-size:34px;line-height:1.1}
+#rot-dd-sub{font-size:10.5px;color:var(--lbl);margin-top:5px;line-height:1.6}
+/* プレイヤーカード(RPG風) */
+#player-card{display:flex;gap:12px;align-items:center;flex:none;margin-bottom:7px;padding:8px 12px;
+  border:1px solid rgba(0,240,255,.35);background:linear-gradient(135deg,rgba(0,240,255,.10),rgba(189,0,255,.06));
+  clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+#player-card .pc-emb{width:56px;height:62px;flex:none;filter:drop-shadow(0 0 10px rgba(0,240,255,.6))}
+#player-card .pc-mid{flex:1;min-width:0}
+#player-card .pc-title{font-family:'Orbitron';font-size:16px;color:#fff;letter-spacing:2px;text-shadow:0 0 10px rgba(0,240,255,.5)}
+#player-card .pc-bar{width:100%;height:10px;display:block;margin:5px 0 3px}
+#player-card .pc-sub{font-size:10.5px;color:var(--lbl)}
 </style>
 </head>
 <body>
@@ -480,6 +500,7 @@ body.closing{animation:crtoff .28s forwards}
     <button class="btn yel" id="btn-sound">SE:ON</button>
     <button class="btn yel" id="btn-notify">通知:OFF</button>
     <button class="btn mag" id="btn-test">SEテスト</button>
+    <input type="range" id="vol" min="0" max="100" step="5" title="音量">
   </div>
   <div class="hgroup">
     <button class="btn" id="btn-diag">回線診断</button>
@@ -495,6 +516,7 @@ body.closing{animation:crtoff .28s forwards}
     <div id="lvl-chip" title="XP: 監視1分+1 / ATH+50 / キリ番+30 / 目標+200 / ミッションボーナス"></div>
     <div id="status" title="クリックで回線診断"><div id="led"></div><span id="status-txt">BOOT</span></div>
     <div id="clock">--:--:--</div>
+    <a id="credit" href="https://0rnot.com" target="_blank" rel="noopener" title="制作: 0rnot — 自己紹介は 0rnot.com">0RNOT</a>
   </div>
 </header>
 
@@ -545,6 +567,10 @@ body.closing{animation:crtoff .28s forwards}
     </div>
     <div id="macro-body" class="rot-body"><div class="mgrid" id="macro-grid"></div></div>
     <div id="idx-body" class="rot-body"><div class="mgrid" id="idx-grid"></div></div>
+    <div id="dd-body" class="rot-body">
+      <div id="rot-dd-left"><div class="tp-label">FROM ATH</div><div id="rot-dd-num">--</div><div id="rot-dd-sub"></div></div>
+      <canvas id="rot-dd-chart" style="flex:1;min-height:60px;align-self:stretch"></canvas>
+    </div>
     </div>
     <div class="note" id="fg-note">12秒ごとにパネル自動スライド(ホバーで停止/●クリックで選択)。VIXは過去5日推移。</div>
   </section>
@@ -607,6 +633,7 @@ body.closing{animation:crtoff .28s forwards}
     <div class="note">このツールを開いた日の推定評価額を自動記録した実測ログ(ダミーなし)。使うほど伸びていく。</div></section>
   <section class="panelbox" id="pl2"><h2>ACHIEVEMENTS // 実績</h2><div id="log-badges" style="flex:1;overflow-y:auto"></div></section>
   <section class="panelbox" id="pl3"><h2>MISSIONS &amp; STATS // 今日のミッションと統計</h2>
+    <div id="player-card"></div>
     <div id="log-msn"></div>
     <div class="mgrid" id="log-stats" style="margin-top:6px"></div></section>
   <section class="panelbox" id="pl4"><h2>EVENT LOG // イベント履歴</h2><div id="log-events" style="flex:1;overflow-y:auto"></div></section>
@@ -678,7 +705,7 @@ body.closing{animation:crtoff .28s forwards}
       <li>数字が動かない時は<em>回線診断</em>。指数データは最大15分程度の遅延あり。</li>
       <li>データはブラウザのlocalStorage保存。<em>保存/復元</em>でJSONバックアップ。GitHub Pagesに置けばスマホでも見られる。</li>
     </ol>
-    <div class="foot">※ 表示は推定値であり実際の基準価額・評価額と乖離します。投資判断は自己責任で。データ: Yahoo Finance / 三菱UFJアセットマネジメント / Binance / CNN / ForexFactory / NHK / ExchangeRate-API (無保証・遅延あり)。構成銘柄比率は月報ベースの静的概算(コード内CONSTITUENTSで編集可)。</div>
+    <div class="foot">※ 表示は推定値であり実際の基準価額・評価額と乖離します。投資判断は自己責任で。データ: Yahoo Finance / 三菱UFJアセットマネジメント / Binance / CNN / ForexFactory / NHK / ExchangeRate-API (無保証・遅延あり)。構成銘柄比率は月報ベースの静的概算(コード内CONSTITUENTSで編集可)。<br><br>制作: <a href="https://0rnot.com" target="_blank" rel="noopener" style="color:var(--cyan)">0rnot</a> — 自己紹介・その他の作品は 0rnot.com へ。</div>
     <div class="mrow"><button class="btn" id="info-close">閉じる</button></div>
   </div>
 </div>
@@ -1706,6 +1733,7 @@ const ROT=[
   {t:'VIX // 恐怖指数',b:'vix-body'},
   {t:'MACRO // 為替・金利・金・BTC',b:'macro-body'},
   {t:'INDICES // 世界の指数',b:'idx-body'},
+  {t:'DRAWDOWN // 最高値からの距離',b:'dd-body'},
 ];
 let rotIdx=0,rotPaused=false;
 function renderRot(){
@@ -1721,7 +1749,22 @@ function renderRot(){
   if(rotIdx===0)renderFG();
   else if(rotIdx===1)renderVix();
   else if(rotIdx===2)renderMacro();
-  else renderIdx();
+  else if(rotIdx===3)renderIdx();
+  else renderRotDD();
+}
+/* 最高値からの距離パネル */
+function renderRotDD(){
+  const el=$('rot-dd-num');if(!el)return;
+  if(!ath||lastTotal==null){el.textContent='--';return;}
+  const d=(lastTotal/ath.v-1)*100;
+  const at=d>=-0.05;
+  const col=at?'#00ff9f':(d>-3?'#f9f002':'#ff2a6d');
+  el.textContent=at?'AT ATH':d.toFixed(2)+'%';
+  el.style.color=col;el.style.textShadow='0 0 16px '+col;
+  $('rot-dd-sub').innerHTML='最高値 '+fmtYen(ath.v)+'<br>あと '+Math.round(Math.max(ath.v-lastTotal,0)).toLocaleString()+'円';
+  const pf=portfolioDaily();
+  const m=pf?metricsOf(pf):null;
+  if(m)drawChart($('rot-dd-chart'),m.dd,{stroke:'#ff2a6d',labels:true});
 }
 function mcell(k,v,c,cls){return `<div class="mcell"><div class="k">${k}</div><div class="v">${v}</div><div class="c ${cls}">${c}</div></div>`;}
 function renderVix(){
@@ -1819,8 +1862,19 @@ function drawChart(cv,pts,opt){
 }
 
 /* ============ SE & エフェクト & 通知 ============ */
-let actx=null;
-function audio(){if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)();if(actx.state==='suspended')actx.resume();return actx;}
+let actx=null,masterG=null;
+let VOL=(localStorage.getItem('nnav_vol')!=null)?+localStorage.getItem('nnav_vol'):0.7;
+function audio(){
+  if(!actx){
+    actx=new (window.AudioContext||window.webkitAudioContext)();
+    masterG=actx.createGain();
+    masterG.gain.value=VOL;
+    masterG.connect(actx.destination);
+  }
+  if(actx.state==='suspended')actx.resume();
+  return actx;
+}
+function MDest(){audio();return masterG;}
 function tone(f,at,dur,type,vol,dest,slide){
   const ctx=audio(),o=ctx.createOscillator(),g=ctx.createGain();
   o.type=type;o.frequency.setValueAtTime(f,at);
@@ -1828,7 +1882,7 @@ function tone(f,at,dur,type,vol,dest,slide){
   g.gain.setValueAtTime(0,at);
   g.gain.linearRampToValueAtTime(vol,at+0.012);
   g.gain.exponentialRampToValueAtTime(0.0001,at+dur);
-  o.connect(g);g.connect(dest||ctx.destination);
+  o.connect(g);g.connect(dest||MDest());
   o.start(at);o.stop(at+dur+0.05);
   return o;
 }
@@ -1837,7 +1891,7 @@ function seATH(){
   try{
     const ctx=audio(),t=ctx.currentTime+0.04;
     const comp=ctx.createDynamicsCompressor();
-    comp.threshold.value=-18;comp.ratio.value=8;comp.connect(ctx.destination);
+    comp.threshold.value=-18;comp.ratio.value=8;comp.connect(MDest());
     const master=ctx.createGain();master.gain.value=0.95;master.connect(comp);
     const dly=ctx.createDelay(1);dly.delayTime.value=0.22;
     const fb=ctx.createGain();fb.gain.value=0.42;dly.connect(fb);fb.connect(dly);
@@ -2248,6 +2302,13 @@ $('btn-notify').addEventListener('click',async()=>{
 });
 $('btn-notify').textContent='通知:'+(notifyOn?'ON':'OFF');
 $('btn-test').addEventListener('click',()=>{const was=seOn;seOn=true;bigEffect();seOn=was;});
+$('vol').value=Math.round(VOL*100);
+$('vol').addEventListener('input',()=>{
+  VOL=(+$('vol').value)/100;
+  if(masterG)masterG.gain.value=VOL;
+  try{localStorage.setItem('nnav_vol',String(VOL));}catch(e){}
+});
+$('vol').addEventListener('change',()=>{if(seOn)seSession();});
 $('sel-int').value=localStorage.getItem('nnav_int')||'10000';
 $('sel-int').addEventListener('change',()=>{
   localStorage.setItem('nnav_int',$('sel-int').value);
@@ -2283,25 +2344,41 @@ $('comp-legend').addEventListener('click',e=>{
 
 /* ============ チュートリアル ============ */
 const TOUR=[
-  ['total-panel','合計パネル','全銘柄+現金の推定評価額をリアルタイム表示。▲は直前からの変化、⚡COMBOは連続上昇、NEXT ATHは史上最高値までの残り。下のタブでチャート期間を切替。'],
-  ['comp-legend','構成比と編集','銘柄ごとの内訳。ここをクリックすると編集/削除できる(パネルのない現金もここから)。'],
-  ['cards','銘柄パネル','投信の推定基準価額(公式基準価額×指数×為替のライブ予測)と評価額。1H〜1Yでチャート切替。「基準更新」で公式値に再同期。仮想通貨はコンパクト表示。'],
-  ['fg-panel','マーケット情報','Fear&Greed/VIX(5日推移)/マクロ/世界指数が12秒ごとにスライド。ホバーで停止、●クリックで固定。'],
-  ['heat-panel','実質構成ヒートマップ','保有投信を合成した「実質的に持っている個別株」。面積=比率、色=当日騰落。ホバーで詳細。'],
-  ['ticker-panel','経済指標とニュース','今週の重要経済指標(★=最重要、点滅=次のイベント)と経済ニュース。指標にカーソルで予想/前回値。'],
-  ['btn-add','銘柄追加','投信(オルカン等は公式基準価額を自動取得)・仮想通貨(数量だけ)・現金(金額だけ)を登録できる。'],
-  ['btn-sound','サウンド','OFF→ON→ON+の3段階。ON+は上昇ティックごとにコイン音。史上最高値・目標達成・キリ番で脳汁SE。'],
-  ['btn-export','バックアップ','データはこのブラウザ内にのみ保存。JSONで保存/復元。別端末やGitHub Pages版への引っ越しにも使う。'],
+  ['tabs','4つの画面','一覧(ダッシュボード)/分析(リスク指標)/市場(世界市況)/記録(実績とミッション)をタブで切替。切替中も裏で更新は続く。','dash'],
+  ['total-panel','合計パネル','全銘柄+現金の推定評価額をリアルタイム表示。▲は直前からの変化、⚡COMBOは連続上昇、NEXT ATHは史上最高値までの残り。下のタブでチャート期間切替。','dash'],
+  ['comp-legend','構成比と編集','銘柄ごとの内訳。クリックで編集/削除(パネルのない現金もここから)。','dash'],
+  ['cards','銘柄パネル','投信の推定基準価額(公式基準価額×指数×為替のライブ予測)と評価額。1H〜1Yでチャート切替。「基準更新」で公式値に再同期。','dash'],
+  ['fg-panel','マーケット情報','F&G/VIX/マクロ/世界指数/最高値からの距離が自動スライド。ホバーで停止、●で固定。','dash'],
+  ['heat-panel','実質構成ヒートマップ','保有投信を合成した「実質的に持っている個別株」。面積=比率、色=当日騰落。','dash'],
+  ['ticker-panel','経済指標とニュース','今週の重要指標(★=最重要)と経済ニュースが流れる。指標にカーソルで予想/前回値。','dash'],
+  ['ana-met','リスク指標(分析タブ)','S&P500との勝ち負け比較、日次リターン分布、最大ドローダウンなどを1年日次データから機械計算。','ana'],
+  ['pa4','ドローダウン','最高値からの下落率推移。対象(全体/個別)と期間を切替可能。','ana'],
+  ['pm3','世界市場の時間帯(市場タブ)','東京/ロンドン/NY/CME先物の取引時間をJSTで表示。開場中は発光、OPEN/CLOSEカウントダウン付き。','mkt'],
+  ['player-card','レベルと称号(記録タブ)','監視・ATH更新・ミッションでXPが貯まる。レベルアップで称号が昇格し全画面演出。','log'],
+  ['log-msn','デイリーミッション','毎日5つ+全達成ボーナス。毎日0時リセット。継続でXPと🔥連続記録が伸びる。','log'],
+  ['btn-add','銘柄追加','投信(公式基準価額を自動取得)・仮想通貨(数量だけ)・現金(金額だけ)を登録。','dash'],
+  ['btn-sound','サウンドと音量','SEはOFF→ON→ON+の3段階(ON+は上昇ティックでコイン音)。右のスライダーで音量調整。','dash'],
+  ['btn-export','バックアップ','データはこのブラウザ内にのみ保存。JSONで保存/復元。GitHub Pages版への引っ越しにも。','dash'],
 ];
 let tourIdx=-1;
 function tourEnd(){
   tourIdx=-1;
   ['tour-dim','tour-hl','tour-tip'].forEach(id=>{$(id).style.display='none';});
+  if(activeTab!=='dash')switchTab('dash');
 }
 function tourShow(i){
   if(i<0)i=0;
   if(i>=TOUR.length){tourEnd();return;}
   tourIdx=i;
+  const step=TOUR[i];
+  if(step[3]&&activeTab!==step[3]){
+    switchTab(step[3]);
+    setTimeout(()=>{if(tourIdx===i)tourShowAt(i);},420);
+    return;
+  }
+  tourShowAt(i);
+}
+function tourShowAt(i){
   const step=TOUR[i];
   const el=document.getElementById(step[0]);
   if(!el){tourShow(i+1);return;}
@@ -2411,17 +2488,51 @@ function checkMissions(){
       logEvent('msn','ミッション達成: '+m[1]+' (+'+m[2]+'XP)');
     }
   }
+  /* 全ミッション制覇ボーナス */
+  if(!msn.bonus&&MISSIONS.every(m=>msn.done[m[0]])){
+    msn.bonus=1;saveMsn();
+    addXp(50);smallEffect();
+    logEvent('msn','🎁 デイリー全ミッション制覇ボーナス +50XP');
+    notify('🎁 COMPLETE','本日の全ミッション制覇! +50XP');
+  }
   if(activeTab==='log')renderMissions();
+}
+const TITLES=['見習いトレーダー','駆け出し観測者','チャート見張り番','投機士','相場師','シティボーイ','スナイパー','錬金術師','大口(クジラ候補)','クジラ','相場の支配者'];
+function renderPlayer(){
+  const el=$('player-card');if(!el)return;
+  const lvl=lvlOf(xp),cur=xp-lvl*lvl*100,need=((lvl+1)*(lvl+1)-lvl*lvl)*100;
+  const stk=streakDays();
+  el.innerHTML=`
+    <svg class="pc-emb" viewBox="0 0 60 66">
+      <path d="M30 3l25 14.5v31L30 63 5 48.5v-31z" fill="rgba(0,240,255,.15)" stroke="#00f0ff" stroke-width="2.5"/>
+      <path d="M30 10l19 11v24L30 56 11 45V21z" fill="none" stroke="#bd00ff" stroke-width="1" opacity=".6"/>
+      <text x="30" y="42" text-anchor="middle" font-size="21" fill="#fff" font-family="Orbitron" font-weight="900">${lvl}</text>
+    </svg>
+    <div class="pc-mid">
+      <div class="pc-title">${TITLES[Math.min(lvl,TITLES.length-1)]}</div>
+      <svg class="pc-bar" viewBox="0 0 100 10" preserveAspectRatio="none">
+        <rect width="100" height="10" fill="rgba(58,66,102,.4)"/>
+        <rect width="${Math.min(cur/need*100,100).toFixed(1)}" height="10" fill="#00f0ff"><animate attributeName="width" from="0" to="${Math.min(cur/need*100,100).toFixed(1)}" dur="0.8s" fill="freeze"/></rect>
+      </svg>
+      <div class="pc-sub">XP ${cur}/${need} ─ 次のレベルまであと${need-cur}XP${stk>=2?' ─ 🔥'+stk+'日連続':''}</div>
+    </div>`;
 }
 function renderMissions(){
   const el=$('log-msn');if(!el)return;
   msnInit();
   el.innerHTML=MISSIONS.map(m=>{
     const done=!!msn.done[m[0]];
+    let prog='';
+    if(m[0]==='watch10'&&!done)prog=' ('+Math.min(Math.floor((msn.secs||0)/60),10)+'/10分)';
+    if(m[0]==='tabs'&&!done)prog=' ('+['ana','mkt','log'].filter(k=>msn.flags[k]).length+'/3)';
     return `<div class="msn ${done?'ok':''}">
       <svg viewBox="0 0 16 16" width="14" height="14">${done?'<path d="M2 8l4 4 8-9" fill="none" stroke="#00ff9f" stroke-width="2.4"/>':'<circle cx="8" cy="8" r="6" fill="none" stroke="#3a4266" stroke-width="1.6"/>'}</svg>
-      <span>${m[1]}</span><b>+${m[2]}XP</b></div>`;
-  }).join('')+`<div class="note">毎日0時リセット。達成でXP獲得→レベルアップで全画面演出。</div>`;
+      <span>${m[1]}${prog}</span><b>+${m[2]}XP</b></div>`;
+  }).join('')+`<div class="msn ${msn.bonus?'ok':''}" style="border-style:dashed">
+    <svg viewBox="0 0 16 16" width="14" height="14">${msn.bonus?'<path d="M2 8l4 4 8-9" fill="none" stroke="#00ff9f" stroke-width="2.4"/>':'<circle cx="8" cy="8" r="6" fill="none" stroke="#f9f002" stroke-width="1.6" stroke-dasharray="3 2"/>'}</svg>
+    <span>🎁 全ミッション制覇ボーナス</span><b>+50XP</b></div>
+  <div class="note">毎日0時リセット。達成でXP→レベルアップで全画面演出+称号昇格。</div>`;
+  renderPlayer();
 }
 const PAGE_IDS={dash:'app',ana:'page-ana',mkt:'page-mkt',log:'page-log'};
 let activeTab='dash';
@@ -2473,7 +2584,17 @@ function switchTab(tb){
   if(tb==='ana')renderAnalytics();
   if(tb==='mkt')renderMarket();
   if(tb==='log')renderLog();
+  if(tb==='dash'){setTimeout(redrawAll,60);setTimeout(redrawAll,450);}
   if(tb!=='dash')mission(tb); /* タブ巡回ミッション */
+}
+/* タブ復帰時にキャンバスを正しいサイズで即再描画(表示乱れ対策) */
+function redrawAll(){
+  try{
+    drawTotalChart();
+    holdings.forEach(h=>{if(!h.cash)drawAssetChart(h);});
+    renderHoldingsMix();
+    renderRot();
+  }catch(e){}
 }
 $('tabs').addEventListener('click',e=>{
   const b=e.target.closest('.tab');if(b)switchTab(b.dataset.tab);
