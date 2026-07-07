@@ -403,6 +403,8 @@ body.closing{animation:crtoff .28s forwards}
 #top10::-webkit-scrollbar,#ana-ret::-webkit-scrollbar,#log-events::-webkit-scrollbar,#log-badges::-webkit-scrollbar,.stats-mini::-webkit-scrollbar{display:none}
 @media(min-width:1200px){
   .page.on{display:grid;height:calc(100vh - 44px);grid-template-columns:repeat(12,1fr);grid-template-rows:1fr 1fr;overflow:hidden}
+  #page-ana.on{grid-template-rows:minmax(0,1.3fr) minmax(0,.7fr)}
+  #page-mkt.on{grid-template-rows:minmax(0,1.12fr) minmax(0,.88fr)}
   #pa1{grid-column:1/6;grid-row:1}#pa5{grid-column:1/6;grid-row:2}#pa2{grid-column:6/13;grid-row:1}#pa3{grid-column:6/10;grid-row:2}#pa4{grid-column:10/13;grid-row:2}
   #pm1{grid-column:1/5}#pm2{grid-column:5/9}#pm4{grid-column:9/13;grid-row:1}#pm3{grid-column:1/8;grid-row:2}#pm5{grid-column:8/13;grid-row:2}
   #pl1{grid-column:1/8}#pl2{grid-column:8/13}#pl3{grid-column:1/5}#pl4{grid-column:5/13}
@@ -630,7 +632,7 @@ body.closing{animation:crtoff .28s forwards}
 <div id="page-mkt" class="page">
   <section class="panelbox" id="pm1"><h2>FEAR &amp; GREED // CNN(拡大)</h2>
     <div style="display:flex;gap:12px;flex:1;min-height:0;align-items:center">
-      <svg id="mkt-fg" viewBox="0 0 200 120" style="flex:1;min-width:0;max-width:340px"></svg>
+      <svg id="mkt-fg" viewBox="0 0 200 120" style="flex:1;min-width:0;max-width:440px"></svg>
       <div style="flex:1;min-width:0;display:flex;flex-direction:column;align-self:stretch">
         <div id="mkt-fg-rows" class="mgrid" style="flex:none;grid-auto-rows:auto"></div>
         <div class="pctl" id="mkt-fg-ctl" style="margin-top:6px"></div>
@@ -642,7 +644,7 @@ body.closing{animation:crtoff .28s forwards}
     <div class="pctl" id="mkt-vix-ctl"></div>
     <canvas id="mkt-vix" style="flex:1;min-height:80px"></canvas></section>
   <section class="panelbox" id="pm3"><h2>WORLD SESSIONS // 世界市場の取引時間(JST・概略)</h2>
-    <svg id="mkt-sess" viewBox="0 0 860 200" preserveAspectRatio="xMidYMid meet" style="flex:1;width:100%;min-height:0"></svg></section>
+    <svg id="mkt-sess" viewBox="0 0 860 152" preserveAspectRatio="xMidYMid meet" style="flex:1;width:100%;min-height:0"></svg></section>
   <section class="panelbox" id="pm5"><h2>GLOBAL EXCHANGES // 主要取引所の立会時間(JST・概略)</h2>
     <div id="mkt-world" style="flex:1;overflow-y:auto;scrollbar-width:none"></div>
     <div class="note">平日ベースの概略時間。祝日・サマータイム切替で30分〜1時間前後する。●=現在開場中。</div></section>
@@ -2693,7 +2695,14 @@ function seriesEstNav(h,rk){
 function metricsOf(pts){
   if(!pts||pts.length<15)return null;
   const last=pts[pts.length-1].v;
-  const ago=n=>{const i=pts.length-1-n;return i>=0?(last/pts[i].v-1)*100:null;};
+  const lastT=pts[pts.length-1].t;
+  /* 期間リターンは「点数」ではなく「実時間」で遡る(BTC等の暦日系列と投信の営業日系列を混在させても整合) */
+  const agoT=days=>{
+    const target=lastT-days*864e5;
+    let v0=null;
+    for(const p of pts){if(p.t<=target)v0=p.v;else break;}
+    return (v0!=null&&v0>0)?(last/v0-1)*100:null;
+  };
   const rets=[];for(let i=1;i<pts.length;i++)rets.push(pts[i].v/pts[i-1].v-1);
   const m=rets.reduce((a,b)=>a+b,0)/rets.length;
   const sd=Math.sqrt(rets.reduce((a,b)=>a+(b-m)*(b-m),0)/rets.length);
@@ -2705,7 +2714,7 @@ function metricsOf(pts){
     if(r>best){best=r;bestT=pts[i+1].t;}
     if(r<worst){worst=r;worstT=pts[i+1].t;}
   });
-  return {r1m:ago(21),r3m:ago(63),r6m:ago(126),r1y:(last/pts[0].v-1)*100,
+  return {r1m:agoT(30),r3m:agoT(91),r6m:agoT(182),r1y:(last/pts[0].v-1)*100,
     vol:sd*Math.sqrt(252)*100,mdd,best:best*100,worst:worst*100,bestT,worstT,dd,rets,pts};
 }
 /* 日次リターン分布ヒストグラム(SVG) */
@@ -2728,7 +2737,9 @@ function portfolioDaily(){
   if(!series.length)return null;
   let grid=[...new Set([].concat.apply([],series.map(sr=>sr.pts.map(p=>p.t))))].sort((a,b)=>a-b);
   const startT=Math.max.apply(null,series.map(sr=>sr.pts[0].t));
-  grid=grid.filter(t=>t>=startT);
+  /* 銘柄間でキャッシュ鮮度が違う場合の歪み防止: 全銘柄がカバーする範囲+3日までに揃える */
+  const endT=Math.min.apply(null,series.map(sr=>sr.pts[sr.pts.length-1].t))+3*864e5;
+  grid=grid.filter(t=>t>=startT&&t<=endT);
   const its=series.map(sr=>({h:sr.h,pts:sr.pts,i:-1}));
   const out=[];
   for(const t of grid){
@@ -2866,7 +2877,9 @@ function renderAnalytics(){
   }else{$('ana-note').textContent='データ準備中(1Y先読み完了後に表示)。';}
   /* 期間リターン表 */
   const rows=[];
-  if(met)rows.push({nm:'◆ ポートフォリオ全体',m:met,color:'#00f0ff'});
+  /* 表は常に1Yフル系列で計算(上の期間タブの影響を受けない) */
+  const metFull=pf?metricsOf(pf):null;
+  if(metFull)rows.push({nm:'◆ ポートフォリオ全体',m:metFull,color:'#00f0ff'});
   for(const h of holdings){
     if(h.cash)continue;
     const s=seriesEstNav(h,'1Y');
@@ -2962,12 +2975,16 @@ async function drawVixChart(col){
 const WORLD_MKTS=[
   ['シドニー ASX',[[9,15]]],
   ['東京 TSE',[[9,11.5],[12.5,15.42]]],
+  ['ソウル KRX',[[9,15.5]]],
+  ['台北 TWSE',[[10,14.5]]],
   ['香港 HKEX',[[10.5,13],[14,17]]],
   ['上海 SSE',[[10.5,12.5],[14,16]]],
   ['シンガポール SGX',[[10,18]]],
   ['ムンバイ NSE',[[12.75,19]]],
+  ['チューリッヒ SIX',[[16,24],[0,0.5]]],
   ['フランクフルト Xetra',[[16,24],[0,0.5]]],
   ['ロンドン LSE',[[16,24],[0,0.5]]],
+  ['トロント TSX',[[22.5,24],[0,5]]],
   ['ニューヨーク NYSE',[[22.5,24],[0,5]]],
 ];
 function renderWorldTable(){
@@ -2999,8 +3016,8 @@ function renderSessions(){
   let out='';
   /* 時間軸 */
   for(let h3=0;h3<=24;h3+=3){
-    out+=`<line x1="${hx(h3)}" y1="24" x2="${hx(h3)}" y2="176" stroke="rgba(0,240,255,.12)"/>
-      <text x="${hx(h3)}" y="16" text-anchor="middle" font-size="10" fill="#3a4266">${h3}時</text>`;
+    out+=`<line x1="${hx(h3)}" y1="17" x2="${hx(h3)}" y2="138" stroke="rgba(0,240,255,.12)"/>
+      <text x="${hx(h3)}" y="11" text-anchor="middle" font-size="10" fill="#3a4266">${h3}時</text>`;
   }
   const remainTxt=segs=>{
     const cur=segs.find(s2=>nowH>=s2[0]&&nowH<s2[1]);
@@ -3015,18 +3032,18 @@ function renderSessions(){
     return (open?'CLOSEまで ':'OPENまで ')+hh4+':'+String(mm).padStart(2,'0');
   };
   rows.forEach((r2,i)=>{
-    const y=40+i*36;
+    const y=24+i*29;
     const openNow=r2[1].some(seg=>nowH>=seg[0]&&nowH<seg[1]);
-    out+=`<text x="8" y="${y+13}" font-size="11" fill="${openNow?r2[2]:'#3a4266'}">${r2[0]}${openNow?' ●':''}</text>
-      <text x="${X1}" y="${y-3}" text-anchor="end" font-size="9" fill="${openNow?r2[2]:'#3a4266'}">${remainTxt(r2[1])}</text>
-      <line x1="${X0}" y1="${y+9}" x2="${X1}" y2="${y+9}" stroke="rgba(58,66,102,.5)"/>`;
+    out+=`<text x="8" y="${y+12}" font-size="11" fill="${openNow?r2[2]:'#3a4266'}">${r2[0]}${openNow?' ●':''}</text>
+      <text x="${X1}" y="${y-1}" text-anchor="end" font-size="8.5" fill="${openNow?r2[2]:'#3a4266'}">${remainTxt(r2[1])}</text>
+      <line x1="${X0}" y1="${y+8}" x2="${X1}" y2="${y+8}" stroke="rgba(58,66,102,.5)"/>`;
     for(const seg of r2[1]){
-      out+=`<rect x="${hx(seg[0]).toFixed(1)}" y="${y}" width="${(hx(Math.min(seg[1],24))-hx(seg[0])).toFixed(1)}" height="18" rx="2"
+      out+=`<rect x="${hx(seg[0]).toFixed(1)}" y="${y}" width="${(hx(Math.min(seg[1],24))-hx(seg[0])).toFixed(1)}" height="16" rx="2"
         fill="${r2[2]}" opacity="${openNow?'.55':'.22'}" stroke="${r2[2]}" stroke-opacity=".6"/>`;
     }
   });
-  out+=`<line x1="${hx(nowH).toFixed(1)}" y1="22" x2="${hx(nowH).toFixed(1)}" y2="184" stroke="#fff" stroke-width="1.5" stroke-dasharray="4 3"/>
-    <text x="${hx(nowH).toFixed(1)}" y="196" text-anchor="middle" font-size="10" fill="#fff">NOW ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}</text>`;
+  out+=`<line x1="${hx(nowH).toFixed(1)}" y1="15" x2="${hx(nowH).toFixed(1)}" y2="140" stroke="#fff" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <text x="${hx(nowH).toFixed(1)}" y="150" text-anchor="middle" font-size="9" fill="#fff">NOW ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}</text>`;
   svg.innerHTML=out;
 }
 
