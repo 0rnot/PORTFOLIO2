@@ -48,7 +48,12 @@ h1.glitch::after{color:var(--grn);clip-path:inset(60% 0 10% 0);animation:gl2 3.1
 @keyframes gl2{0%,90%{transform:none;opacity:0}93%{transform:translate(3px,1px);opacity:.7}97%{transform:translate(-3px,0);opacity:.7}100%{opacity:0}}
 #hright{margin-left:auto;display:flex;gap:12px;align-items:center}
 #clock{color:var(--yel);text-shadow:0 0 8px rgba(249,240,2,.6);font-size:13px}
-.hgroup{display:flex;gap:6px;align-items:center;padding:0 8px;border-left:1px solid rgba(0,240,255,.14)}
+.hgroup{display:flex;gap:5px;align-items:center;padding:0 6px;border-left:1px solid rgba(0,240,255,.14)}
+.btn.ico{width:30px;padding:0;display:inline-flex;align-items:center;justify-content:center}
+.btn.ico svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.btn.on2{border-color:var(--yel);color:var(--yel);box-shadow:0 0 10px rgba(249,240,2,.4)}
+#status-txt{max-width:130px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+@media(min-width:1360px){header{flex-wrap:nowrap}}
 #status{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--dim);cursor:pointer}
 #led{width:9px;height:9px;border-radius:50%;background:#444}
 #led.ok{background:var(--grn);box-shadow:0 0 10px var(--grn);animation:pulse 2s infinite}
@@ -398,14 +403,19 @@ body.closing{animation:crtoff .28s forwards}
 #top10::-webkit-scrollbar,#ana-ret::-webkit-scrollbar,#log-events::-webkit-scrollbar,#log-badges::-webkit-scrollbar,.stats-mini::-webkit-scrollbar{display:none}
 @media(min-width:1200px){
   .page.on{display:grid;height:calc(100vh - 44px);grid-template-columns:repeat(12,1fr);grid-template-rows:1fr 1fr;overflow:hidden}
-  #pa1{grid-column:1/5}#pa2{grid-column:5/13}#pa3{grid-column:1/7}#pa4{grid-column:7/13}
-  #pm1{grid-column:1/5}#pm2{grid-column:5/9}#pm4{grid-column:9/13;grid-row:1}#pm3{grid-column:1/13;grid-row:2}
+  #pa1{grid-column:1/6;grid-row:1/3}#pa2{grid-column:6/13;grid-row:1}#pa3{grid-column:6/10;grid-row:2}#pa4{grid-column:10/13;grid-row:2}
+  #pm1{grid-column:1/5}#pm2{grid-column:5/9}#pm4{grid-column:9/13;grid-row:1}#pm3{grid-column:1/8;grid-row:2}#pm5{grid-column:8/13;grid-row:2}
   #pl1{grid-column:1/8}#pl2{grid-column:8/13}#pl3{grid-column:1/5}#pl4{grid-column:5/13}
 }
 @media(max-width:1199px){
   .page.on>*{min-height:230px}
 }
-#comp-legend2{display:flex;flex-direction:column;gap:4px;margin-top:8px;font-size:11px}
+#comp-legend2{display:flex;flex-direction:column;gap:6px;margin-top:12px;font-size:13px;width:min(100%,560px)}
+.wt-row{display:flex;align-items:center;gap:9px;font-size:12.5px;padding:6px 4px;border-bottom:1px solid rgba(0,240,255,.08)}
+.wt-row .dot{width:8px;height:8px;border-radius:50%;flex:none}
+.wt-n{color:#fff;flex:none;min-width:158px}
+.wt-h{color:var(--lbl);flex:1}
+.wt-row b{font-weight:normal;color:var(--dim);font-family:'Orbitron';font-size:10px;letter-spacing:1px}
 #comp-legend2 .li{display:flex;align-items:center;gap:6px}
 #comp-legend2 .dot{width:8px;height:8px;border-radius:2px}
 #comp-legend2 .pct{color:var(--dim);margin-left:auto}
@@ -487,7 +497,7 @@ body.closing{animation:crtoff .28s forwards}
   </nav>
   <div class="hgroup">
     <button class="btn" id="btn-add">+ 銘柄追加</button>
-    <button class="btn yel" id="btn-goal">目標設定</button>
+    <button class="btn yel ico" id="btn-goal" title="目標金額の設定"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><circle cx="8" cy="8" r="2.2"/><path d="M8 0v2.5M8 13.5V16M0 8h2.5M13.5 8H16"/></svg></button>
   </div>
   <div class="hgroup">
     <select class="hsel" id="sel-int" title="更新間隔">
@@ -498,18 +508,18 @@ body.closing{animation:crtoff .28s forwards}
   </div>
   <div class="hgroup">
     <button class="btn yel" id="btn-sound">SE:ON</button>
-    <button class="btn yel" id="btn-notify">通知:OFF</button>
-    <button class="btn mag" id="btn-test">SEテスト</button>
+    <button class="btn ico" id="btn-notify" title="デスクトップ通知"><svg viewBox="0 0 16 16"><path d="M8 2a4 4 0 0 1 4 4c0 3 1 4 2 5H2c1-1 2-2 2-5a4 4 0 0 1 4-4z"/><path d="M6.5 13a1.5 1.5 0 0 0 3 0"/></svg></button>
+    <button class="btn mag ico" id="btn-test" title="脳汁SEテスト"><svg viewBox="0 0 16 16"><path d="M2 6v4h3l4 3V3L5 6z"/><path d="M11 5c2 1.5 2 4.5 0 6M13 3c3 2.5 3 7.5 0 10"/></svg></button>
     <input type="range" id="vol" min="0" max="100" step="5" title="音量">
   </div>
   <div class="hgroup">
-    <button class="btn" id="btn-diag">回線診断</button>
-    <button class="btn" id="btn-help">ヘルプ</button>
-    <button class="btn" id="btn-info">INFO</button>
+    <button class="btn ico" id="btn-diag" title="回線診断"><svg viewBox="0 0 16 16"><path d="M2 13V9M6 13V6M10 13V3M14 13v-3"/></svg></button>
+    <button class="btn ico" id="btn-help" title="使い方ツアー"><svg viewBox="0 0 16 16"><path d="M5.4 6a2.6 2.6 0 1 1 3.6 2.4c-.8.3-1 1-1 1.7"/><circle cx="8" cy="12.6" r=".9" fill="currentColor" stroke="none"/></svg></button>
+    <button class="btn ico" id="btn-info" title="INFO / 仕組みと免責"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4"/><path d="M8 7.2v4"/><circle cx="8" cy="4.7" r=".9" fill="currentColor" stroke="none"/></svg></button>
   </div>
   <div class="hgroup">
-    <button class="btn" id="btn-export">保存</button>
-    <button class="btn" id="btn-import">復元</button>
+    <button class="btn ico" id="btn-export" title="バックアップ保存(JSON)"><svg viewBox="0 0 16 16"><path d="M8 2v7M5 6.5L8 9.5l3-3M2 11v3h12v-3"/></svg></button>
+    <button class="btn ico" id="btn-import" title="バックアップ復元"><svg viewBox="0 0 16 16"><path d="M8 9V2M5 4.5L8 1.5l3 3M2 11v3h12v-3"/></svg></button>
     <input type="file" id="import-file" accept=".json" style="display:none">
   </div>
   <div id="hright">
@@ -596,7 +606,7 @@ body.closing{animation:crtoff .28s forwards}
 
 <!-- ===== 分析タブ ===== -->
 <div id="page-ana" class="page">
-  <section class="panelbox" id="pa1"><h2>ALLOCATION // 資産配分</h2><div id="ana-donut" style="flex:1;min-height:0;overflow:auto"></div></section>
+  <section class="panelbox" id="pa1"><h2>ALLOCATION // 資産配分</h2><div id="ana-donut" style="flex:1;min-height:0;overflow:auto;scrollbar-width:none;display:flex;flex-direction:column;justify-content:center;align-items:center"></div></section>
   <section class="panelbox" id="pa2"><h2>PORTFOLIO RISK // リスク指標(直近1年・日次)</h2><div class="mgrid" id="ana-met"></div>
     <div class="note">為替込みの推定基準価額ベースで機械計算。ボラティリティは日次リターン標準偏差の年率換算。</div></section>
   <section class="panelbox" id="pa3"><h2>RETURNS // 期間リターン(推定NAVベース)</h2><div id="ana-ret" style="flex:1;overflow-y:auto"></div></section>
@@ -622,6 +632,9 @@ body.closing{animation:crtoff .28s forwards}
     <canvas id="mkt-vix" style="flex:1;min-height:80px"></canvas></section>
   <section class="panelbox" id="pm3"><h2>WORLD SESSIONS // 世界市場の取引時間(JST・概略)</h2>
     <svg id="mkt-sess" viewBox="0 0 860 200" preserveAspectRatio="xMidYMid meet" style="flex:1;width:100%;min-height:0"></svg></section>
+  <section class="panelbox" id="pm5"><h2>GLOBAL EXCHANGES // 主要取引所の立会時間(JST・概略)</h2>
+    <div id="mkt-world" style="flex:1;overflow-y:auto;scrollbar-width:none"></div>
+    <div class="note">平日ベースの概略時間。祝日・サマータイム切替で30分〜1時間前後する。●=現在開場中。</div></section>
   <section class="panelbox" id="pm4"><h2>BOARD // 指数・マクロ一覧</h2><div class="mgrid" id="mkt-board" style="grid-template-columns:1fr 1fr 1fr"></div></section>
 </div>
 
@@ -2298,9 +2311,14 @@ $('btn-notify').addEventListener('click',async()=>{
     notifyOn=true;
   }else notifyOn=false;
   localStorage.setItem('nnav_notify',notifyOn?'on':'off');
-  $('btn-notify').textContent='通知:'+(notifyOn?'ON':'OFF');
+  notifLabel();
 });
-$('btn-notify').textContent='通知:'+(notifyOn?'ON':'OFF');
+function notifLabel(){
+  const b=$('btn-notify');
+  b.classList.toggle('on2',notifyOn);
+  b.title='デスクトップ通知: '+(notifyOn?'ON':'OFF');
+}
+notifLabel();
 $('btn-test').addEventListener('click',()=>{const was=seOn;seOn=true;bigEffect();seOn=was;});
 $('vol').value=Math.round(VOL*100);
 $('vol').addEventListener('input',()=>{
@@ -2698,7 +2716,7 @@ function renderAnalytics(){
         return `<path d="${d2}" fill="${it.h.color}" opacity=".82" stroke="#05060f" stroke-width="1.5"><title>${it.h.name} ${(frac*100).toFixed(1)}%</title></path>`;
       }).join('');
     }
-    dEl.innerHTML=`<svg viewBox="0 0 220 220" style="max-width:250px;width:100%;display:block;margin:0 auto;filter:drop-shadow(0 0 14px rgba(0,240,255,.3))">
+    dEl.innerHTML=`<svg viewBox="0 0 220 220" style="width:min(100%,560px);display:block;margin:0 auto;filter:drop-shadow(0 0 18px rgba(0,240,255,.35))">
       ${seg}
       <circle cx="110" cy="110" r="50" fill="none" stroke="rgba(0,240,255,.25)" stroke-dasharray="4 6"/>
       <text x="110" y="103" text-anchor="middle" font-size="10" fill="#3a4266" letter-spacing="2">TOTAL</text>
@@ -2814,8 +2832,9 @@ function renderMarket(){
     $('mkt-vix-ctl').innerHTML=tabsHtml('vix',[['1D','1D'],['5D','5D'],['1M','1M'],['6M','6M'],['1Y','1Y']],pageSel.vix);
     drawVixChart(z[1]);
   }
-  /* 世界セッションSVG */
+  /* 世界セッションSVG+取引所テーブル */
   renderSessions();
+  renderWorldTable();
   /* ボード(SVGスパークライン付き) */
   const b=$('mkt-board');let h2='';
   const fxm=market[FXSYM];
@@ -2845,6 +2864,31 @@ async function drawVixChart(col){
   else{try{pts=await ensureRange('^VIX',rk);}catch(e){}}
   if((!pts||pts.length<2)&&extras['^VIX'])pts=extras['^VIX'].pts;
   if(pts&&pts.length>1)drawChart(cv,pts,{stroke:col||'#f9f002',labels:true});
+}
+/* 主要取引所テーブル(開場状態はライブ計算) */
+const WORLD_MKTS=[
+  ['シドニー ASX',[[9,15]]],
+  ['東京 TSE',[[9,11.5],[12.5,15.42]]],
+  ['香港 HKEX',[[10.5,13],[14,17]]],
+  ['上海 SSE',[[10.5,12.5],[14,16]]],
+  ['シンガポール SGX',[[10,18]]],
+  ['ムンバイ NSE',[[12.75,19]]],
+  ['フランクフルト Xetra',[[16,24],[0,0.5]]],
+  ['ロンドン LSE',[[16,24],[0,0.5]]],
+  ['ニューヨーク NYSE',[[22.5,24],[0,5]]],
+];
+function renderWorldTable(){
+  const el=$('mkt-world');if(!el)return;
+  const now=new Date();
+  const nowH=now.getHours()+now.getMinutes()/60;
+  const wknd=now.getDay()===0||now.getDay()===6;
+  const fH=h=>{const hh=Math.floor(h)%24,mm=Math.round((h-Math.floor(h))*60);return hh+':'+String(mm).padStart(2,'0');};
+  el.innerHTML=WORLD_MKTS.map(m=>{
+    const open=!wknd&&m[1].some(s=>nowH>=s[0]&&nowH<s[1]);
+    const hrs=m[1].map(s=>fH(s[0])+'〜'+fH(s[1])).join(' / ');
+    return `<div class="wt-row"><span class="dot" style="background:${open?'#00ff9f':'#3a4266'};box-shadow:${open?'0 0 8px #00ff9f':'none'}"></span>
+      <span class="wt-n">${m[0]}</span><span class="wt-h">${hrs}</span><b class="${open?'up-t':''}">${open?'OPEN':'CLOSED'}</b></div>`;
+  }).join('');
 }
 function renderSessions(){
   const svg=$('mkt-sess');if(!svg)return;
@@ -2960,7 +3004,7 @@ function renderLog(){
      <span class="ico">${ICO[ev.type]||'◆'}</span><span>${ev.msg}</span></div>`).join('')
     :'<div class="note">ATH更新・目標達成・キリ番などがここに記録されていく。</div>';
 }
-setInterval(()=>{if(activeTab==='mkt')renderSessions();},60*1000);
+setInterval(()=>{if(activeTab==='mkt'){renderSessions();renderWorldTable();}},60*1000);
 
 /* 起動/終了エフェクト制御 */
 setTimeout(()=>{
