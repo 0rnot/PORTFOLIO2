@@ -6,7 +6,7 @@
 <title>NEURO-NAV</title>
 <meta name="theme-color" content="#05060f">
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+<link rel="icon" id="fav" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -403,7 +403,7 @@ body.closing{animation:crtoff .28s forwards}
 #top10::-webkit-scrollbar,#ana-ret::-webkit-scrollbar,#log-events::-webkit-scrollbar,#log-badges::-webkit-scrollbar,.stats-mini::-webkit-scrollbar{display:none}
 @media(min-width:1200px){
   .page.on{display:grid;height:calc(100vh - 44px);grid-template-columns:repeat(12,1fr);grid-template-rows:1fr 1fr;overflow:hidden}
-  #pa1{grid-column:1/6;grid-row:1/3}#pa2{grid-column:6/13;grid-row:1}#pa3{grid-column:6/10;grid-row:2}#pa4{grid-column:10/13;grid-row:2}
+  #pa1{grid-column:1/6;grid-row:1}#pa5{grid-column:1/6;grid-row:2}#pa2{grid-column:6/13;grid-row:1}#pa3{grid-column:6/10;grid-row:2}#pa4{grid-column:10/13;grid-row:2}
   #pm1{grid-column:1/5}#pm2{grid-column:5/9}#pm4{grid-column:9/13;grid-row:1}#pm3{grid-column:1/8;grid-row:2}#pm5{grid-column:8/13;grid-row:2}
   #pl1{grid-column:1/8}#pl2{grid-column:8/13}#pl3{grid-column:1/5}#pl4{grid-column:5/13}
 }
@@ -424,9 +424,18 @@ body.closing{animation:crtoff .28s forwards}
   border-bottom:1px solid rgba(0,240,255,.1);padding:6px 0;font-size:12px;flex:1;min-height:34px}
 .rrow .nm{color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rrow.head{flex:none;min-height:0;color:var(--dim);font-size:9px;letter-spacing:1px;border-bottom:1px solid rgba(0,240,255,.3)}
-.rbar{display:flex;align-items:center;gap:6px;height:100%}
-.rbar svg{flex:1;height:min(55%,20px);min-height:10px;min-width:0}
-.rbar b{font-weight:normal;font-size:12px;min-width:64px;text-align:right}
+.rbar{display:flex;flex-direction:column;justify-content:center;gap:3px;height:100%;min-width:0}
+.rbar b{font-weight:normal;font-size:13.5px;min-width:0;text-align:left;line-height:1}
+.rbar svg{width:100%;height:9px;min-height:9px}
+/* 銘柄別内訳(大きめ表示) */
+.adrow{display:flex;align-items:center;gap:10px;padding:9px 6px;border-bottom:1px solid rgba(0,240,255,.1);font-size:15px}
+.adrow .dot{width:10px;height:10px;border-radius:3px;flex:none}
+.adrow .adn{color:#fff;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.adrow .adp{color:var(--lbl);flex:none;font-size:13px;min-width:52px;text-align:right}
+.adrow b{font-family:'Orbitron';font-size:18px;color:#fff;font-weight:700;flex:none;min-width:120px;text-align:right}
+.adrow b small{font-size:11px;color:var(--dim)}
+.adrow .adc{flex:none;font-size:13px;min-width:64px;text-align:right}
+.adrow.sum{border-top:1px solid rgba(0,240,255,.35);border-bottom:none;margin-top:2px}
 #log-badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(94px,1fr));gap:8px;align-content:start}
 .badge{display:inline-flex;flex-direction:column;align-items:center;gap:3px;width:auto;margin:0;text-align:center}
 .badge svg{width:64px;height:70px;filter:drop-shadow(0 0 8px rgba(0,240,255,.35))}
@@ -509,8 +518,7 @@ body.closing{animation:crtoff .28s forwards}
   <div class="hgroup">
     <button class="btn yel" id="btn-sound">SE:ON</button>
     <button class="btn ico" id="btn-notify" title="デスクトップ通知"><svg viewBox="0 0 16 16"><path d="M8 2a4 4 0 0 1 4 4c0 3 1 4 2 5H2c1-1 2-2 2-5a4 4 0 0 1 4-4z"/><path d="M6.5 13a1.5 1.5 0 0 0 3 0"/></svg></button>
-    <button class="btn mag ico" id="btn-test" title="脳汁SEテスト"><svg viewBox="0 0 16 16"><path d="M2 6v4h3l4 3V3L5 6z"/><path d="M11 5c2 1.5 2 4.5 0 6M13 3c3 2.5 3 7.5 0 10"/></svg></button>
-    <input type="range" id="vol" min="0" max="100" step="5" title="音量">
+    <input type="range" id="vol" min="0" max="100" step="5" title="音量(変更時に確認音)">
   </div>
   <div class="hgroup">
     <button class="btn ico" id="btn-diag" title="回線診断"><svg viewBox="0 0 16 16"><path d="M2 13V9M6 13V6M10 13V3M14 13v-3"/></svg></button>
@@ -606,9 +614,12 @@ body.closing{animation:crtoff .28s forwards}
 
 <!-- ===== 分析タブ ===== -->
 <div id="page-ana" class="page">
-  <section class="panelbox" id="pa1"><h2>ALLOCATION // 資産配分</h2><div id="ana-donut" style="flex:1;min-height:0;overflow:auto;scrollbar-width:none;display:flex;flex-direction:column;justify-content:center;align-items:center"></div></section>
-  <section class="panelbox" id="pa2"><h2>PORTFOLIO RISK // リスク指標(直近1年・日次)</h2><div class="mgrid" id="ana-met"></div>
-    <div class="note">為替込みの推定基準価額ベースで機械計算。ボラティリティは日次リターン標準偏差の年率換算。</div></section>
+  <section class="panelbox" id="pa1"><h2>ALLOCATION // 資産配分</h2><div id="ana-donut" style="flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;align-items:center"></div></section>
+  <section class="panelbox" id="pa5"><h2>DETAILS // 銘柄別内訳</h2><div id="ana-detail" style="flex:1;overflow-y:auto;scrollbar-width:none"></div></section>
+  <section class="panelbox" id="pa2"><h2>PORTFOLIO RISK // リスク指標(日次・期間切替可)</h2>
+    <div class="pctl" id="ana-met-ctl"></div>
+    <div class="mgrid" id="ana-met"></div>
+    <div class="note">為替込みの推定基準価額ベースで機械計算。ボラティリティは日次リターン標準偏差の年率換算。S&P500比較は同一期間のES先物(USD)。</div></section>
   <section class="panelbox" id="pa3"><h2>RETURNS // 期間リターン(推定NAVベース)</h2><div id="ana-ret" style="flex:1;overflow-y:auto"></div></section>
   <section class="panelbox" id="pa4"><h2>DRAWDOWN // 下落率推移(対象・期間切替可)</h2>
     <div class="pctl" id="ana-dd-ctl"></div>
@@ -790,7 +801,7 @@ let quotes={},fgData=null,totalHistory=[],totalRange='1D';
 let sessionHigh=null,dispTotal=null,lastTotal=null,firstCalc=true,prevEst={};
 let lastSessFx=0,lastAthFx=0,editingId=null,loopTimer=null,nextAt=0;
 let seTick=localStorage.getItem('nnav_setick')==='on';
-let combo=0,lastComboFx=0,lastCoin=0,msMax=+(localStorage.getItem('nnav_ms')||0);
+let combo=0,comboDn=0,lastComboFx=0,lastCoin=0,msMax=+(localStorage.getItem('nnav_ms')||0);
 const $=id=>document.getElementById(id);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 holdings.forEach((h,i)=>{if(!h.color)h.color=COLORS[i%COLORS.length];});
@@ -1177,16 +1188,23 @@ function compute(){
     td2.className=(df>=0?'up-t':'dn-t')+' show';
     clearTimeout(td2._h);td2._h=setTimeout(()=>td2.classList.remove('show'),4000);
     floatDelta(df);
-    /* コンボ(実データの連続上昇ティックのみ) */
-    if(df>0){combo++;seCoin();}else combo=0;
+    /* コンボ(実データの連続ティックのみ): 上昇=⚡ / 下落=💀 */
+    if(df>0){combo++;comboDn=0;seCoin();}
+    else{comboDn++;combo=0;}
     const cEl=$('combo');
-    if(combo>=3){cEl.textContent='⚡COMBO ×'+combo;cEl.classList.add('show');}
+    if(combo>=3){cEl.textContent='⚡COMBO ×'+combo;cEl.classList.add('show');cEl.style.color='var(--yel)';cEl.style.textShadow='0 0 10px var(--yel)';}
+    else if(comboDn>=3){cEl.textContent='💀COMBO ×'+comboDn;cEl.classList.add('show');cEl.style.color='var(--mag)';cEl.style.textShadow='0 0 10px var(--mag)';}
     else cEl.classList.remove('show');
     if((combo===5||combo===10||combo===20||combo===30)&&Date.now()-lastComboFx>5000){
       lastComboFx=Date.now();seSession();burst(30+combo*4);
     }
+    if((comboDn===5||comboDn===10||comboDn===20)&&Date.now()-lastComboFx>5000){
+      lastComboFx=Date.now();seDown();
+    }
     if(combo===5)mission('combo5');
     if(combo>(stats.maxCombo||0)){stats.maxCombo=combo;saveStats();}
+    if(comboDn>(stats.maxComboDn||0)){stats.maxComboDn=comboDn;saveStats();}
+    if(comboDn===10){logEvent('ms','💀逆コンボ×10 を耐えた');}
   }
   if(firstCalc){
     firstCalc=false;sessionHigh=total;
@@ -1228,6 +1246,9 @@ function compute(){
   const td=$('t-day');
   td.textContent=dayPct==null?'--':((dayDiff>=0?'+':'')+Math.round(dayDiff).toLocaleString()+'円/'+fmtPct(dayPct));
   td.className=dayPct>=0?'up-t':'dn-t';
+  /* タイトルバーに常時表示(他タブ作業中でも見える) */
+  document.title=(dayPct==null?'':(dayPct>=0?'▲ ':'▼ '))+Math.round(total).toLocaleString()+'円 | NEURO-NAV';
+  if(dayPct!=null)setFav(dayPct>=0);
   $('t-shigh').textContent=fmtYen(sessionHigh);
   $('t-ath').textContent=ath?fmtYen(ath.v):'--';
   renderComposition(total);renderGoal(total);renderAthRow(total);renderAssets();renderHoldingsMix();
@@ -1975,6 +1996,16 @@ function seSession(){
     tone(3135.96,t+0.16,0.2,'sine',0.03);
   }catch(e){}
 }
+/* 逆コンボ用の不穏な低音 */
+function seDown(){
+  if(!seOn)return;
+  try{
+    const ctx=audio(),t=ctx.currentTime+0.02;
+    tone(196,t,0.35,'sawtooth',0.05,null,98);
+    tone(98,t+0.06,0.5,'sine',0.07,null,49);
+    tone(233,t+0.12,0.3,'triangle',0.04,null,116);
+  }catch(e){}
+}
 /* 上昇ティックごとの微コイン音(SE:ON+のみ、実変化のみ) */
 function seCoin(){
   if(!seOn||!seTick)return;
@@ -2319,7 +2350,36 @@ function notifLabel(){
   b.title='デスクトップ通知: '+(notifyOn?'ON':'OFF');
 }
 notifLabel();
-$('btn-test').addEventListener('click',()=>{const was=seOn;seOn=true;bigEffect();seOn=was;});
+/* キーボードショートカット: 1-4=タブ / S=サウンド / A=銘柄追加 / G=目標 / H=ヘルプ */
+document.addEventListener('keydown',e=>{
+  if(e.target&&/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;
+  if(e.ctrlKey||e.metaKey||e.altKey)return;
+  if(e.key>='1'&&e.key<='4')switchTab(['dash','ana','mkt','log'][+e.key-1]);
+  else if(e.key==='s'||e.key==='S')$('btn-sound').click();
+  else if(e.key==='a'||e.key==='A')$('btn-add').click();
+  else if(e.key==='g'||e.key==='G')$('btn-goal').click();
+  else if(e.key==='h'||e.key==='H'||e.key==='?')tourShow(0);
+});
+/* 合計金額クリックで花火(押したくなるやつ) */
+$('total-val').style.cursor='pointer';
+$('total-val').addEventListener('click',()=>{burst(70);if(seOn)seSession();});
+/* 前日比に応じた動的favicon(バックグラウンドタブでも方向がわかる) */
+let favDir=null;
+function setFav(up){
+  if(up===favDir||!$('fav'))return;
+  favDir=up;
+  try{
+    const c=document.createElement('canvas');c.width=c.height=32;
+    const x=c.getContext('2d');
+    x.fillStyle='#05060f';x.fillRect(0,0,32,32);
+    x.fillStyle=up?'#00ff9f':'#ff2a6d';
+    x.beginPath();
+    if(up){x.moveTo(16,5);x.lineTo(28,25);x.lineTo(4,25);}
+    else{x.moveTo(16,27);x.lineTo(28,7);x.lineTo(4,7);}
+    x.closePath();x.fill();
+    $('fav').href=c.toDataURL('image/png');
+  }catch(e){}
+}
 $('vol').value=Math.round(VOL*100);
 $('vol').addEventListener('input',()=>{
   VOL=(+$('vol').value)/100;
@@ -2555,7 +2615,7 @@ function renderMissions(){
 const PAGE_IDS={dash:'app',ana:'page-ana',mkt:'page-mkt',log:'page-log'};
 let activeTab='dash';
 /* グラフの期間/対象セレクタ状態 */
-const pageSel={dd:'1Y',ddT:'pf',fg:'MAX',vix:'5D',eq:'ALL'};
+const pageSel={dd:'1Y',ddT:'pf',fg:'MAX',vix:'5D',eq:'ALL',bm:'1Y'};
 function tabsHtml(name,pairs,cur){
   return `<div class="rtabs ptabs" data-ptab="${name}">`+pairs.map(p=>`<button data-v="${p[0]}" class="${p[0]===cur?'on':''}">${p[1]}</button>`).join('')+'</div>';
 }
@@ -2688,12 +2748,13 @@ function rbarSvg(v,maxAbs){
   if(v==null)return '<div class="rbar"><b>--</b></div>';
   const half=50,w=Math.min(Math.abs(v)/(maxAbs||1)*half,half);
   const x=v>=0?half:half-w;
-  const col=v>=0?'%2300ff9f':'%23ff2a6d';
   const c2=v>=0?'#00ff9f':'#ff2a6d';
-  return `<div class="rbar"><svg viewBox="0 0 100 12" preserveAspectRatio="none">
-    <line x1="50" y1="0" x2="50" y2="12" stroke="#3a4266" stroke-width="1"/>
-    <rect x="${x.toFixed(1)}" y="2" width="${Math.max(w,0.5).toFixed(1)}" height="8" fill="${c2}" opacity=".8"/>
-    </svg><b class="${pctCls(v)}">${fmtPct(v)}</b></div>`;
+  return `<div class="rbar"><b class="${pctCls(v)}">${fmtPct(v)}</b>
+    <svg viewBox="0 0 100 12" preserveAspectRatio="none">
+    <rect x="0" y="1" width="100" height="10" fill="rgba(58,66,102,.22)"/>
+    <line x1="50" y1="0" x2="50" y2="12" stroke="#4a5480" stroke-width="1.2"/>
+    <rect x="${x.toFixed(1)}" y="1" width="${Math.max(w,0.8).toFixed(1)}" height="10" fill="${c2}" opacity=".85"/>
+    </svg></div>`;
 }
 function renderAnalytics(){
   /* ドーナツ配分 */
@@ -2716,39 +2777,71 @@ function renderAnalytics(){
         return `<path d="${d2}" fill="${it.h.color}" opacity=".82" stroke="#05060f" stroke-width="1.5"><title>${it.h.name} ${(frac*100).toFixed(1)}%</title></path>`;
       }).join('');
     }
-    dEl.innerHTML=`<svg viewBox="0 0 220 220" style="width:min(100%,560px);display:block;margin:0 auto;filter:drop-shadow(0 0 18px rgba(0,240,255,.35))">
+    dEl.innerHTML=`<svg viewBox="0 0 220 220" style="flex:1;min-height:0;width:100%;max-height:100%;filter:drop-shadow(0 0 18px rgba(0,240,255,.35))">
       ${seg}
       <circle cx="110" cy="110" r="50" fill="none" stroke="rgba(0,240,255,.25)" stroke-dasharray="4 6"/>
-      <text x="110" y="103" text-anchor="middle" font-size="10" fill="#3a4266" letter-spacing="2">TOTAL</text>
-      <text x="110" y="123" text-anchor="middle" font-size="15" fill="#fff" font-family="Orbitron">${lastTotal!=null?Math.round(lastTotal).toLocaleString():'--'}</text></svg>
-      <div id="comp-legend2">${items.map(it=>`<div class="li"><span class="dot" style="background:${it.h.color}"></span>${it.h.name}<span class="pct">${fmtYen(it.e)} / ${(it.e/total*100).toFixed(1)}%</span></div>`).join('')}</div>`;
-    /* 取得元本と評価損益(取得単価が入力済みの銘柄+現金で算出) */
-    let inv=0,cur=0;
-    for(const it of items){
-      if(it.h.cash){inv+=it.h.units;cur+=it.e;continue;}
-      if(it.h.costNav>0){inv+=it.h.crypto?it.h.costNav*it.h.units:it.h.costNav*it.h.units/10000;cur+=it.e;}
-    }
-    if(inv>0){
-      const pl=cur-inv;
-      dEl.innerHTML+=`<div class="dsub">取得元本(判明分)<b>${fmtYen(inv)}</b></div>
-        <div class="dsub">評価損益(判明分)<b class="${pctCls(pl)}">${(pl>=0?'+':'')+Math.round(pl).toLocaleString()}円 (${fmtPct(pl/inv*100)})</b></div>`;
+      <text x="110" y="103" text-anchor="middle" font-size="9" fill="#3a4266" letter-spacing="2">TOTAL</text>
+      <text x="110" y="121" text-anchor="middle" font-size="14" fill="#fff" font-family="Orbitron">${lastTotal!=null?Math.round(lastTotal).toLocaleString():'--'}</text></svg>`;
+    /* 銘柄別内訳(別パネル・大きめ表示) */
+    const det=$('ana-detail');
+    if(det){
+      let inv=0;
+      let rowsH=items.map(it=>{
+        if(it.h.cash)inv+=it.h.units;
+        else if(it.h.costNav>0)inv+=it.h.crypto?it.h.costNav*it.h.units:it.h.costNav*it.h.units/10000;
+        const d2=it.h.cash?null:dayChangePct(it.h);
+        return `<div class="adrow"><span class="dot" style="background:${it.h.color};box-shadow:0 0 8px ${it.h.color}"></span>
+          <span class="adn">${it.h.name}</span>
+          <span class="adp">${(it.e/total*100).toFixed(1)}%</span>
+          <b>${Math.round(it.e).toLocaleString()}<small> 円</small></b>
+          <span class="adc ${d2==null?'':(d2>=0?'up-t':'dn-t')}">${d2==null?'—':fmtPct(d2)}</span></div>`;
+      }).join('');
+      rowsH+=`<div class="adrow sum"><span class="dot" style="background:#00f0ff;box-shadow:0 0 8px #00f0ff"></span>
+        <span class="adn">合計</span><span class="adp">100%</span>
+        <b>${Math.round(total).toLocaleString()}<small> 円</small></b><span class="adc"></span></div>`;
+      if(inv>0){
+        const pl=total-inv;
+        rowsH+=`<div class="adrow"><span class="dot" style="background:#3a4266"></span>
+          <span class="adn">取得元本(判明分)</span><span class="adp"></span>
+          <b>${Math.round(inv).toLocaleString()}<small> 円</small></b><span class="adc"></span></div>
+        <div class="adrow"><span class="dot" style="background:${pl>=0?'#00ff9f':'#ff2a6d'}"></span>
+          <span class="adn">評価損益(判明分)</span><span class="adp ${pctCls(pl)}">${fmtPct(pl/inv*100)}</span>
+          <b class="${pctCls(pl)}">${(pl>=0?'+':'')+Math.round(pl).toLocaleString()}<small> 円</small></b><span class="adc"></span></div>`;
+      }
+      det.innerHTML=rowsH;
     }
   }
-  /* ポートフォリオ指標: S&P500比較+文脈チャートで意味を持たせる */
+  /* ポートフォリオ指標: 期間選択式でS&P500と同一期間比較 */
   const pf=portfolioDaily();
-  const met=pf?metricsOf(pf):null;
   const mEl=$('ana-met');
+  $('ana-met-ctl').innerHTML=tabsHtml('bm',[['1M','1M'],['3M','3M'],['6M','6M'],['1Y','1Y']],pageSel.bm);
+  const nB={'1M':23,'3M':65,'6M':127,'1Y':Infinity}[pageSel.bm];
+  const pfW=pf?(nB===Infinity?pf:pf.slice(-nB)):null;
+  const met=(pfW&&pfW.length>=15)?metricsOf(pfW):null;
   if(!met){mEl.innerHTML='<div class="note">1年ヒストリカルの先読み完了後に表示(起動から数十秒)。</div>';}
   else{
     const bhc=histCache['ES=F|1Y']||histCache['^GSPC|1Y'];
-    const bm=bhc?metricsOf(bhc.pts):null;
-    const cmp=(v,bv,unit)=>bm==null||bv==null?'':`S&P500: <b class="${pctCls(bv)}">${(bv>=0&&unit==='%p'?'+':'')+bv.toFixed(1)}${unit==='%p'?'%':'%'}</b>${v!=null?(v>=bv?' → 勝ち':' → 負け'):''}`;
+    let bm=null,rel=null;
+    if(bhc&&bhc.pts.length>=15){
+      const bp=(nB===Infinity)?bhc.pts:bhc.pts.slice(-nB);
+      if(bp.length>=15){
+        bm=metricsOf(bp);
+        /* 相対パフォーマンス曲線(自分÷S&P500、1超え=勝ち) */
+        const n2=Math.min(pfW.length,bp.length);
+        const p0=pfW[pfW.length-n2].v,b0=bp[bp.length-n2].v;
+        rel=[];
+        for(let i2=0;i2<n2;i2++){
+          rel.push({t:pfW[pfW.length-n2+i2].t,v:(pfW[pfW.length-n2+i2].v/p0)/(bp[bp.length-n2+i2].v/b0)});
+        }
+      }
+    }
     const dstr=t=>t?new Date(t).toLocaleDateString('ja-JP',{month:'numeric',day:'numeric'}):'';
+    const diff=bm?met.r1y-bm.r1y:null;
     const cells=[
-      ['1年リターン',fmtPct(met.r1y),pctCls(met.r1y),cmp(met.r1y,bm&&bm.r1y,'%p'),sparkSvg(pf,met.r1y>=0?'#00ff9f':'#ff2a6d')],
-      ['6ヶ月リターン',met.r6m!=null?fmtPct(met.r6m):'--',pctCls(met.r6m||0),cmp(met.r6m,bm&&bm.r6m,'%p'),sparkSvg(pf.slice(-127),(met.r6m||0)>=0?'#00ff9f':'#ff2a6d')],
-      ['ボラティリティ(年率)',met.vol.toFixed(1)+'%','','日次リターン分布↓ '+(bm?'S&P500: '+bm.vol.toFixed(1)+'%':''),histSvg(met.rets)],
-      ['最大ドローダウン',met.mdd.toFixed(1)+'%','dn-t',bm?'S&P500: '+bm.mdd.toFixed(1)+'%':'',sparkSvg(met.dd,'#ff2a6d')],
+      ['期間リターン('+pageSel.bm+')',fmtPct(met.r1y),pctCls(met.r1y),bm?'S&P500: '+fmtPct(bm.r1y):'',sparkSvg(pfW,met.r1y>=0?'#00ff9f':'#ff2a6d')],
+      ['対S&P500 超過リターン',diff==null?'--':(diff>=0?'+':'')+diff.toFixed(1)+'pt',pctCls(diff||0),diff==null?'比較データ待ち':(diff>=0?'ベンチマークに勝ち':'ベンチマークに負け'),rel?sparkSvg(rel,(diff||0)>=0?'#00ff9f':'#ff2a6d'):''],
+      ['ボラティリティ(年率)',met.vol.toFixed(1)+'%','',(bm?'S&P500: '+bm.vol.toFixed(1)+'% / ':'')+'日次分布↓',histSvg(met.rets)],
+      ['最大DD(期間内)',met.mdd.toFixed(1)+'%','dn-t',bm?'S&P500: '+bm.mdd.toFixed(1)+'%':'',sparkSvg(met.dd,'#ff2a6d')],
       ['最良日',fmtPct(met.best),'up-t',dstr(met.bestT)+' に発生',''],
       ['最悪日',fmtPct(met.worst),'dn-t',dstr(met.worstT)+' に発生',''],
     ];
@@ -2951,6 +3044,8 @@ const BADGES=[
   ['💴','現金余力',()=>holdings.some(h=>h.cash)],
   ['⏱','通算1時間',s=>(s.secs||0)>=3600],
   ['📅','記録7日',()=>Object.keys(daily).length>=7],
+  ['💀','逆コンボ×10を耐える',s=>(s.maxComboDn||0)>=10],
+  ['🙌','ダイヤモンドハンズ(逆コンボ×20)',s=>(s.maxComboDn||0)>=20],
   ['🔥','7日連続',()=>streakDays()>=7],
   ['⬆','LV.5到達',()=>lvlOf(xp)>=5],
   ['🎖','LV.10到達',()=>lvlOf(xp)>=10],
