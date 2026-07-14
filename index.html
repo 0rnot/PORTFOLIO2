@@ -238,10 +238,10 @@ h1.glitch::after{color:var(--grn);clip-path:inset(60% 0 10% 0);animation:gl2 3.1
 /* 経済指標カレンダー & ニュース */
 #ticker-panel{display:flex;flex-direction:column;gap:3px;min-height:0;overflow:hidden}
 #calbar{display:flex;align-items:center;height:30px;overflow:hidden;position:relative;
-  background:var(--panel);border:1px solid rgba(0,240,255,.22);padding:0 8px}
+  background:var(--panel);border:1px solid rgba(0,240,255,.22);padding:0 8px 0 0}
 .barlab{font-family:'Orbitron';font-size:9px;color:var(--cyan);letter-spacing:2px;flex:none;margin-right:2px}
-#calbar .barlab{position:relative;z-index:2;background:var(--panel);height:100%;display:flex;align-items:center;padding-right:8px}
-#cal-in{display:inline-flex;gap:6px;white-space:nowrap;align-items:center;will-change:transform;flex:none}
+#calbar .barlab{position:absolute;left:0;top:0;bottom:0;z-index:2;background:var(--panel);height:auto;display:flex;align-items:center;padding-right:10px;box-shadow:8px 0 10px rgba(10,13,30,.95)}
+#cal-in{display:inline-flex;gap:6px;white-space:nowrap;align-items:center;will-change:transform;flex:none;margin-left:86px}
 #cal-in.scroll{animation:calmq var(--caldur,60s) linear infinite;padding-left:30px}
 #cal-in.scroll:hover{animation-play-state:paused}
 @keyframes calmq{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
@@ -297,9 +297,10 @@ h1.glitch::after{color:var(--grn);clip-path:inset(60% 0 10% 0);animation:gl2 3.1
 #ath-overlay.on #ath-text{animation:athtxt 2.6s forwards}
 @keyframes athtxt{0%{transform:scale(.4);filter:blur(8px)}10%{transform:scale(1.15);filter:blur(0)}16%{transform:scale(1)}
   20%{transform:translateX(-4px)}24%{transform:translateX(4px)}28%{transform:none}80%{opacity:1}100%{opacity:0;transform:scale(1.06)}}
-#flash{position:fixed;inset:0;background:#fff;z-index:110;pointer-events:none;opacity:0}
-#flash.on{animation:fl .45s}
-@keyframes fl{0%{opacity:.9}100%{opacity:0}}
+#flash{position:fixed;inset:0;z-index:110;pointer-events:none;opacity:0;
+  background:radial-gradient(circle at 50% 40%, rgba(210,250,255,.85), rgba(0,240,255,.35) 55%, transparent 85%)}
+#flash.on{animation:fl .35s}
+@keyframes fl{0%{opacity:.55}100%{opacity:0}}
 
 /* 起動/終了エフェクト */
 #boot-overlay{position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;align-items:center;justify-content:center;transition:opacity .5s}
@@ -370,9 +371,9 @@ body.closing{animation:crtoff .28s forwards}
   border-image:linear-gradient(90deg,rgba(0,240,255,.5),rgba(189,0,255,.25),transparent) 1;
   padding-bottom:3px}
 /* バーのSVGアイコン */
-#calbar .barlab{padding-left:16px;
+#calbar .barlab{padding-left:26px;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11'%3E%3Crect x='1' y='2.5' width='9' height='7.5' fill='none' stroke='%23f9f002'/%3E%3Cpath d='M1 5h9M3.5 2.5V1M7.5 2.5V1' stroke='%23f9f002'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:left center;background-size:11px 11px}
+  background-repeat:no-repeat;background-position:9px center;background-size:11px 11px}
 #newsbar .barlab{padding-left:24px;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11'%3E%3Cpath d='M1.5 10.5V7.5M4.5 10.5V5M7.5 10.5V3M10 10.5V1' stroke='%2300ff9f' stroke-width='1.6'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:8px center;background-size:11px 11px}
@@ -2021,6 +2022,7 @@ function seCoin(){
 }
 function bigEffect(title,sub){
   seATH();
+  if(document.hidden)return; /* 非表示中は視覚エフェクトを出さない(復帰時の謎の白フラッシュ防止) */
   const at=$('ath-text');
   at.childNodes[0].textContent=title||'ALL-TIME HIGH';
   at.querySelector('small').textContent=sub||'史上最高値更新 // DOPAMINE RELEASED';
